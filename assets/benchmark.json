@@ -1,0 +1,2312 @@
+{
+  "schema_version": 1,
+  "benchmark": "flashrerand-v0-cpu-cuda",
+  "status": "completed",
+  "created_utc": "2026-10-03T07:10:49.967547+00:00",
+  "diagnostic_only": false,
+  "source_sha256": {
+    "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+    "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+    "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+    "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+    "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+    "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+    "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+    "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+    "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+    "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+    "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+  },
+  "cpu_core_detection": {
+    "available_cores": 48,
+    "detection": "physical cores within process affinity"
+  },
+  "cpu_tuning": {
+    "jobs": [
+      {
+        "status": "completed",
+        "config": {
+          "n": 10000,
+          "p": 128,
+          "n1": 5000,
+          "candidates": 2048,
+          "k": 64,
+          "case_id": "n10000-p128-c2048-k64",
+          "device": "cpu",
+          "seed": 42,
+          "threads": 1,
+          "batch_size": 512,
+          "warmup": 1,
+          "repeats": 3,
+          "precision": "fp64",
+          "criterion": "full_covariance_ddof1",
+          "whitening": "pre",
+          "sampler": "keys",
+          "balance": "gemm",
+          "selection": "all",
+          "prepare_backend": "cpu",
+          "validation": "checked"
+        },
+        "seconds": [
+          5.744050533045083,
+          5.758211860433221,
+          5.76056551001966
+        ],
+        "phase": "done",
+        "source_sha256": {
+          "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+          "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+          "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+          "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+          "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+          "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+          "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+          "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+          "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+          "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+          "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+        },
+        "package_version": "0.1.0",
+        "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+        "first_call_seconds": 5.9234364698641,
+        "median_seconds": 5.758211860433221,
+        "validation": {
+          "status": "passed",
+          "count": 64,
+          "atol": 1e-10,
+          "rtol": 1e-11,
+          "max_abs_error": 2.7000623958883807e-13,
+          "binary_fixed_count": true,
+          "host_output": true,
+          "own_score_order_exact": true,
+          "assignments_sha256": "f85a416ca15595bd45e2feeec60075c01028aadab75f44b8328be8c7eb4b871a",
+          "scores_sha256": "a515f7606b4a183b561616889c66778a88716faf6abe046a30aa7e9287b8278b",
+          "candidate_ids_sha256": "8ac32c8bfe57a2b311a851a1bde4cad733c69780167e99add5ef1b18ce1ed4be",
+          "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+        },
+        "environment": {
+          "python": "3.12.13",
+          "os": "Linux",
+          "architecture": "x86_64",
+          "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+          "numpy": "1.26.4",
+          "device": "cpu",
+          "thread_environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1",
+            "BLIS_NUM_THREADS": "1"
+          },
+          "threadpools": null,
+          "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+          "blas": {
+            "blas": {
+              "name": "openblas64",
+              "version": "0.3.23.dev"
+            },
+            "lapack": {
+              "name": "dep140551260102944",
+              "version": "1.26.4"
+            }
+          }
+        }
+      },
+      {
+        "status": "completed",
+        "config": {
+          "n": 10000,
+          "p": 128,
+          "n1": 5000,
+          "candidates": 2048,
+          "k": 64,
+          "case_id": "n10000-p128-c2048-k64",
+          "device": "cpu",
+          "seed": 42,
+          "threads": 1,
+          "batch_size": 2048,
+          "warmup": 1,
+          "repeats": 3,
+          "precision": "fp64",
+          "criterion": "full_covariance_ddof1",
+          "whitening": "pre",
+          "sampler": "keys",
+          "balance": "gemm",
+          "selection": "all",
+          "prepare_backend": "cpu",
+          "validation": "checked"
+        },
+        "seconds": [
+          5.857618579175323,
+          5.850622986909002,
+          5.83423150004819
+        ],
+        "phase": "done",
+        "source_sha256": {
+          "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+          "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+          "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+          "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+          "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+          "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+          "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+          "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+          "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+          "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+          "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+        },
+        "package_version": "0.1.0",
+        "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+        "first_call_seconds": 5.86977226799354,
+        "median_seconds": 5.850622986909002,
+        "validation": {
+          "status": "passed",
+          "count": 64,
+          "atol": 1e-10,
+          "rtol": 1e-11,
+          "max_abs_error": 2.7000623958883807e-13,
+          "binary_fixed_count": true,
+          "host_output": true,
+          "own_score_order_exact": true,
+          "assignments_sha256": "f85a416ca15595bd45e2feeec60075c01028aadab75f44b8328be8c7eb4b871a",
+          "scores_sha256": "a515f7606b4a183b561616889c66778a88716faf6abe046a30aa7e9287b8278b",
+          "candidate_ids_sha256": "8ac32c8bfe57a2b311a851a1bde4cad733c69780167e99add5ef1b18ce1ed4be",
+          "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+        },
+        "environment": {
+          "python": "3.12.13",
+          "os": "Linux",
+          "architecture": "x86_64",
+          "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+          "numpy": "1.26.4",
+          "device": "cpu",
+          "thread_environment": {
+            "OMP_NUM_THREADS": "1",
+            "OPENBLAS_NUM_THREADS": "1",
+            "MKL_NUM_THREADS": "1",
+            "VECLIB_MAXIMUM_THREADS": "1",
+            "NUMEXPR_NUM_THREADS": "1",
+            "BLIS_NUM_THREADS": "1"
+          },
+          "threadpools": null,
+          "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+          "blas": {
+            "blas": {
+              "name": "openblas64",
+              "version": "0.3.23.dev"
+            },
+            "lapack": {
+              "name": "dep140551260102944",
+              "version": "1.26.4"
+            }
+          }
+        }
+      },
+      {
+        "status": "completed",
+        "config": {
+          "n": 10000,
+          "p": 128,
+          "n1": 5000,
+          "candidates": 2048,
+          "k": 64,
+          "case_id": "n10000-p128-c2048-k64",
+          "device": "cpu",
+          "seed": 42,
+          "threads": 8,
+          "batch_size": 512,
+          "warmup": 1,
+          "repeats": 3,
+          "precision": "fp64",
+          "criterion": "full_covariance_ddof1",
+          "whitening": "pre",
+          "sampler": "keys",
+          "balance": "gemm",
+          "selection": "all",
+          "prepare_backend": "cpu",
+          "validation": "checked"
+        },
+        "seconds": [
+          5.710002016741782,
+          5.710353205911815,
+          5.700618728995323
+        ],
+        "phase": "done",
+        "source_sha256": {
+          "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+          "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+          "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+          "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+          "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+          "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+          "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+          "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+          "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+          "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+          "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+        },
+        "package_version": "0.1.0",
+        "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+        "first_call_seconds": 5.736903110984713,
+        "median_seconds": 5.710002016741782,
+        "validation": {
+          "status": "passed",
+          "count": 64,
+          "atol": 1e-10,
+          "rtol": 1e-11,
+          "max_abs_error": 2.8421709430404007e-13,
+          "binary_fixed_count": true,
+          "host_output": true,
+          "own_score_order_exact": true,
+          "assignments_sha256": "f85a416ca15595bd45e2feeec60075c01028aadab75f44b8328be8c7eb4b871a",
+          "scores_sha256": "b6702d1e9a935aca69bc2b65b7b791c75da97bd654eb8a6479bfd702f0c0c2bd",
+          "candidate_ids_sha256": "8ac32c8bfe57a2b311a851a1bde4cad733c69780167e99add5ef1b18ce1ed4be",
+          "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+        },
+        "environment": {
+          "python": "3.12.13",
+          "os": "Linux",
+          "architecture": "x86_64",
+          "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+          "numpy": "1.26.4",
+          "device": "cpu",
+          "thread_environment": {
+            "OMP_NUM_THREADS": "8",
+            "OPENBLAS_NUM_THREADS": "8",
+            "MKL_NUM_THREADS": "8",
+            "VECLIB_MAXIMUM_THREADS": "8",
+            "NUMEXPR_NUM_THREADS": "8",
+            "BLIS_NUM_THREADS": "8"
+          },
+          "threadpools": null,
+          "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+          "blas": {
+            "blas": {
+              "name": "openblas64",
+              "version": "0.3.23.dev"
+            },
+            "lapack": {
+              "name": "dep140551260102944",
+              "version": "1.26.4"
+            }
+          }
+        }
+      },
+      {
+        "status": "completed",
+        "config": {
+          "n": 10000,
+          "p": 128,
+          "n1": 5000,
+          "candidates": 2048,
+          "k": 64,
+          "case_id": "n10000-p128-c2048-k64",
+          "device": "cpu",
+          "seed": 42,
+          "threads": 8,
+          "batch_size": 2048,
+          "warmup": 1,
+          "repeats": 3,
+          "precision": "fp64",
+          "criterion": "full_covariance_ddof1",
+          "whitening": "pre",
+          "sampler": "keys",
+          "balance": "gemm",
+          "selection": "all",
+          "prepare_backend": "cpu",
+          "validation": "checked"
+        },
+        "seconds": [
+          5.647887551225722,
+          5.658785049803555,
+          5.648855680599809
+        ],
+        "phase": "done",
+        "source_sha256": {
+          "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+          "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+          "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+          "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+          "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+          "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+          "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+          "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+          "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+          "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+          "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+        },
+        "package_version": "0.1.0",
+        "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+        "first_call_seconds": 5.7604860020801425,
+        "median_seconds": 5.648855680599809,
+        "validation": {
+          "status": "passed",
+          "count": 64,
+          "atol": 1e-10,
+          "rtol": 1e-11,
+          "max_abs_error": 2.8421709430404007e-13,
+          "binary_fixed_count": true,
+          "host_output": true,
+          "own_score_order_exact": true,
+          "assignments_sha256": "f85a416ca15595bd45e2feeec60075c01028aadab75f44b8328be8c7eb4b871a",
+          "scores_sha256": "b6702d1e9a935aca69bc2b65b7b791c75da97bd654eb8a6479bfd702f0c0c2bd",
+          "candidate_ids_sha256": "8ac32c8bfe57a2b311a851a1bde4cad733c69780167e99add5ef1b18ce1ed4be",
+          "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+        },
+        "environment": {
+          "python": "3.12.13",
+          "os": "Linux",
+          "architecture": "x86_64",
+          "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+          "numpy": "1.26.4",
+          "device": "cpu",
+          "thread_environment": {
+            "OMP_NUM_THREADS": "8",
+            "OPENBLAS_NUM_THREADS": "8",
+            "MKL_NUM_THREADS": "8",
+            "VECLIB_MAXIMUM_THREADS": "8",
+            "NUMEXPR_NUM_THREADS": "8",
+            "BLIS_NUM_THREADS": "8"
+          },
+          "threadpools": null,
+          "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+          "blas": {
+            "blas": {
+              "name": "openblas64",
+              "version": "0.3.23.dev"
+            },
+            "lapack": {
+              "name": "dep140551260102944",
+              "version": "1.26.4"
+            }
+          }
+        }
+      }
+    ],
+    "selected": {
+      "threads": 8,
+      "batch_size": 2048,
+      "median_seconds": 5.648855680599809,
+      "case_id": "n10000-p128-c2048-k64",
+      "seed": 42
+    }
+  },
+  "jobs": [
+    {
+      "status": "completed",
+      "config": {
+        "n": 1024,
+        "p": 16,
+        "n1": 512,
+        "candidates": 1024,
+        "k": 32,
+        "case_id": "n1024-p16-c1024-k32",
+        "device": "cpu",
+        "seed": 42,
+        "threads": 8,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "keys",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cpu",
+        "validation": "checked"
+      },
+      "seconds": [
+        0.2152427569963038,
+        0.21501220483332872,
+        0.21278181625530124,
+        0.21240788279101253,
+        0.21298908907920122
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "7b15308f004cb6e672c93498a1ca7e961c1080666238a2d286b1017786c143e1",
+      "first_call_seconds": 0.24457405973225832,
+      "median_seconds": 0.21298908907920122,
+      "validation": {
+        "status": "passed",
+        "count": 32,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.5987211554602254e-14,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "61dbcc4d54d840c8fbc0b44bec26bd60095bb5cc7adfa781967d350dd19ccbfc",
+        "scores_sha256": "693c7b47a29abd2fb2e78c22cba5a18bc51488cde0fecce028c050e43a1dce41",
+        "candidate_ids_sha256": "802e2d9e6a2463e0027d065d6e1057fe8a0a082bf651193513de06dfd9a788d1",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cpu",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "VECLIB_MAXIMUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "BLIS_NUM_THREADS": "8"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 1024,
+        "p": 16,
+        "n1": 512,
+        "candidates": 1024,
+        "k": 32,
+        "case_id": "n1024-p16-c1024-k32",
+        "device": "cuda",
+        "seed": 42,
+        "threads": 1,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "repair",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cuda-qr",
+        "validation": "deferred"
+      },
+      "seconds": [
+        0.005149207077920437,
+        0.005138203036040068,
+        0.005136932712048292,
+        0.005099812056869268,
+        0.005126072093844414
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "7b15308f004cb6e672c93498a1ca7e961c1080666238a2d286b1017786c143e1",
+      "first_call_seconds": 11.299345029052347,
+      "median_seconds": 0.005136932712048292,
+      "validation": {
+        "status": "passed",
+        "count": 32,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.1546319456101628e-14,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "83bed53ff4a2a5f8d01f75856c01dc83ad3ee6708beef2db3bfc2e65506f37fe",
+        "scores_sha256": "1db7e2eb570af4e59dc62e67f4225d162d30081a4ef980308f8ca603c41454b5",
+        "candidate_ids_sha256": "0231ffb47bd2a64745769e35fb9b08bb61991f9b8c8c1998486bab5dec30fe15",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cuda",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "BLIS_NUM_THREADS": "1"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        },
+        "gpu": {
+          "name": "NVIDIA A100-PCIE-40GB",
+          "total_memory_bytes": 42411098112,
+          "compute_capability": "8.0",
+          "visible_device_index": 0,
+          "cupy": "13.6.0",
+          "cuda_runtime": 12090,
+          "cuda_driver": 12050,
+          "cublas_math_mode": 0
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 1024,
+        "p": 16,
+        "n1": 512,
+        "candidates": 1024,
+        "k": 32,
+        "case_id": "n1024-p16-c1024-k32",
+        "device": "cuda",
+        "seed": 43,
+        "threads": 1,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "repair",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cuda-qr",
+        "validation": "deferred"
+      },
+      "seconds": [
+        0.004465335980057716,
+        0.004452049732208252,
+        0.004394704941660166,
+        0.004433392081409693,
+        0.004329039249569178
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "7b15308f004cb6e672c93498a1ca7e961c1080666238a2d286b1017786c143e1",
+      "first_call_seconds": 1.9912809892557561,
+      "median_seconds": 0.004433392081409693,
+      "validation": {
+        "status": "passed",
+        "count": 32,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.1546319456101628e-14,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "da6cf51f2309a14d1df206664f54851c11264165814906fbfeaaa632d4836396",
+        "scores_sha256": "43a9c84ceba8846676d3eb6ef776728e1058324113cdefb3feb820150dd676f8",
+        "candidate_ids_sha256": "176fddfd7617174edf826895322cfc85369dfd889ff71858a85f72a160d7a1f7",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cuda",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "BLIS_NUM_THREADS": "1"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        },
+        "gpu": {
+          "name": "NVIDIA A100-PCIE-40GB",
+          "total_memory_bytes": 42411098112,
+          "compute_capability": "8.0",
+          "visible_device_index": 0,
+          "cupy": "13.6.0",
+          "cuda_runtime": 12090,
+          "cuda_driver": 12050,
+          "cublas_math_mode": 0
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 1024,
+        "p": 16,
+        "n1": 512,
+        "candidates": 1024,
+        "k": 32,
+        "case_id": "n1024-p16-c1024-k32",
+        "device": "cpu",
+        "seed": 43,
+        "threads": 8,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "keys",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cpu",
+        "validation": "checked"
+      },
+      "seconds": [
+        0.2270776778459549,
+        0.22639035480096936,
+        0.2253094520419836,
+        0.22556914808228612,
+        0.22613097913563251
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "7b15308f004cb6e672c93498a1ca7e961c1080666238a2d286b1017786c143e1",
+      "first_call_seconds": 0.24156124284490943,
+      "median_seconds": 0.22613097913563251,
+      "validation": {
+        "status": "passed",
+        "count": 32,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.0658141036401503e-14,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "b95d055e57c74992d22f0306f33906bb1fa44444cab2ad12402e90f3b0297b0a",
+        "scores_sha256": "1b84efea6b1149be8a15e742db01de5b81a687ffdd600e85e83dae24db1791d1",
+        "candidate_ids_sha256": "bf0b9407ee972c4a05623cd3c52f9b43250c7baee8422aa3958e63352e08103a",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cpu",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "VECLIB_MAXIMUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "BLIS_NUM_THREADS": "8"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 1024,
+        "p": 16,
+        "n1": 512,
+        "candidates": 1024,
+        "k": 32,
+        "case_id": "n1024-p16-c1024-k32",
+        "device": "cpu",
+        "seed": 44,
+        "threads": 8,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "keys",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cpu",
+        "validation": "checked"
+      },
+      "seconds": [
+        0.21784168994054198,
+        0.21825300436466932,
+        0.21894015185534954,
+        0.2188479588367045,
+        0.2178191989660263
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "7b15308f004cb6e672c93498a1ca7e961c1080666238a2d286b1017786c143e1",
+      "first_call_seconds": 0.24886802723631263,
+      "median_seconds": 0.21825300436466932,
+      "validation": {
+        "status": "passed",
+        "count": 32,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.3322676295501878e-14,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "6c86390d65d9634e5d697fdb2558a2b803ddc736aecdf3b105a8c05b9fa59a13",
+        "scores_sha256": "6b88c00ab082aa6feb464c8de04e9bc2a0711a38fcba06a0c29f809a6c39f6be",
+        "candidate_ids_sha256": "bf8a0cf5aac026ed95196857e315e4fade09da489ea6439e51e97ab9987b1e44",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cpu",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "VECLIB_MAXIMUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "BLIS_NUM_THREADS": "8"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 1024,
+        "p": 16,
+        "n1": 512,
+        "candidates": 1024,
+        "k": 32,
+        "case_id": "n1024-p16-c1024-k32",
+        "device": "cuda",
+        "seed": 44,
+        "threads": 1,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "repair",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cuda-qr",
+        "validation": "deferred"
+      },
+      "seconds": [
+        0.004513294901698828,
+        0.00452913623303175,
+        0.0045312452130019665,
+        0.004511334002017975,
+        0.004505745135247707
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "7b15308f004cb6e672c93498a1ca7e961c1080666238a2d286b1017786c143e1",
+      "first_call_seconds": 2.059845525305718,
+      "median_seconds": 0.004513294901698828,
+      "validation": {
+        "status": "passed",
+        "count": 32,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.1546319456101628e-14,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "9b6955be5b044f3fb3d82b5c75735082949d427168e7a206955f05189891b42c",
+        "scores_sha256": "0cc9f18b82cd03431493a5cb4988d7f6151fc993976e3dd980dca45847743ce7",
+        "candidate_ids_sha256": "ef0c7a0e17a1642b69f4f02b22338f372e6878ac0c2bb124b982b5fa4c5457f8",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cuda",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "BLIS_NUM_THREADS": "1"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        },
+        "gpu": {
+          "name": "NVIDIA A100-PCIE-40GB",
+          "total_memory_bytes": 42411098112,
+          "compute_capability": "8.0",
+          "visible_device_index": 0,
+          "cupy": "13.6.0",
+          "cuda_runtime": 12090,
+          "cuda_driver": 12050,
+          "cublas_math_mode": 0
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 2048,
+        "k": 64,
+        "case_id": "n10000-p128-c2048-k64",
+        "device": "cuda",
+        "seed": 42,
+        "threads": 1,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "repair",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cuda-qr",
+        "validation": "deferred"
+      },
+      "seconds": [
+        0.03144623106345534,
+        0.0313379131257534,
+        0.03151479875668883,
+        0.031349608674645424,
+        0.031443364918231964
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 4.290871279779822,
+      "median_seconds": 0.031443364918231964,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.7053025658242404e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "a4aee9b2e2a85b6cad81e9137bb2375c3dce337bcddc2988a7f05c6bec5e0c00",
+        "scores_sha256": "b7b2d353e4e3eb8e7ed8c43a886427ed3f8ad53b4ba77bfa896f5fb785fe5ab2",
+        "candidate_ids_sha256": "12248bf96175be1e377ad61f00ccca2ff871abc84741e900c6e791c64544cc34",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cuda",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "BLIS_NUM_THREADS": "1"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        },
+        "gpu": {
+          "name": "NVIDIA A100-PCIE-40GB",
+          "total_memory_bytes": 42411098112,
+          "compute_capability": "8.0",
+          "visible_device_index": 0,
+          "cupy": "13.6.0",
+          "cuda_runtime": 12090,
+          "cuda_driver": 12050,
+          "cublas_math_mode": 0
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 2048,
+        "k": 64,
+        "case_id": "n10000-p128-c2048-k64",
+        "device": "cpu",
+        "seed": 42,
+        "threads": 8,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "keys",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cpu",
+        "validation": "checked"
+      },
+      "seconds": [
+        5.727434914093465,
+        5.727417361922562,
+        5.724328524898738,
+        5.726407764013857,
+        5.742010009009391
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 5.757960636168718,
+      "median_seconds": 5.727417361922562,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 2.8421709430404007e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "f85a416ca15595bd45e2feeec60075c01028aadab75f44b8328be8c7eb4b871a",
+        "scores_sha256": "b6702d1e9a935aca69bc2b65b7b791c75da97bd654eb8a6479bfd702f0c0c2bd",
+        "candidate_ids_sha256": "8ac32c8bfe57a2b311a851a1bde4cad733c69780167e99add5ef1b18ce1ed4be",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cpu",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "VECLIB_MAXIMUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "BLIS_NUM_THREADS": "8"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 2048,
+        "k": 64,
+        "case_id": "n10000-p128-c2048-k64",
+        "device": "cpu",
+        "seed": 43,
+        "threads": 8,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "keys",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cpu",
+        "validation": "checked"
+      },
+      "seconds": [
+        5.844035156071186,
+        5.824108513072133,
+        5.816864215303212,
+        5.84344631107524,
+        5.82974598929286
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 5.91468851454556,
+      "median_seconds": 5.82974598929286,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 2.4158453015843406e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "3096be930fbc8502441d2f46b0cc8a54bcf41b3e634132896d621747e2d66078",
+        "scores_sha256": "acfb13b7cb61e505a463af3260184b565083dda4defed3d2c270130f4e31462d",
+        "candidate_ids_sha256": "cb0a3b88f5ffc2b0b310e1b85b946bd243ced9cece1bdc4b600979f204941b02",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cpu",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "VECLIB_MAXIMUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "BLIS_NUM_THREADS": "8"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 2048,
+        "k": 64,
+        "case_id": "n10000-p128-c2048-k64",
+        "device": "cuda",
+        "seed": 43,
+        "threads": 1,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "repair",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cuda-qr",
+        "validation": "deferred"
+      },
+      "seconds": [
+        0.032913310918956995,
+        0.03294744109734893,
+        0.03270600363612175,
+        0.032792076934129,
+        0.0326086119748652
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 2.0849236552603543,
+      "median_seconds": 0.032792076934129,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.5631940186722204e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "88646a1c147602342aa2b049097f10a47fbfa629c2c27c7f0d90c15ba708ade1",
+        "scores_sha256": "64c3fdd33553e69316f443e7897a9575c8372b54007f67dfca04b88c2b12627b",
+        "candidate_ids_sha256": "60d99af462d6b4838b42e658fdd4313a2f1c6d12a4b28da1911c6e177aee2b2a",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cuda",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "BLIS_NUM_THREADS": "1"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        },
+        "gpu": {
+          "name": "NVIDIA A100-PCIE-40GB",
+          "total_memory_bytes": 42411098112,
+          "compute_capability": "8.0",
+          "visible_device_index": 0,
+          "cupy": "13.6.0",
+          "cuda_runtime": 12090,
+          "cuda_driver": 12050,
+          "cublas_math_mode": 0
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 2048,
+        "k": 64,
+        "case_id": "n10000-p128-c2048-k64",
+        "device": "cuda",
+        "seed": 44,
+        "threads": 1,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "repair",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cuda-qr",
+        "validation": "deferred"
+      },
+      "seconds": [
+        0.04299224587157369,
+        0.04278685012832284,
+        0.04359040083363652,
+        0.04180111829191446,
+        0.03596902312710881
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 2.7441079667769372,
+      "median_seconds": 0.04278685012832284,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.8474111129762605e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "7f60da3415dd22d412928bc8090ea8fc91e8a97af9dae6a4f22d51924f5d6f25",
+        "scores_sha256": "4495b61a1aefd33804b4fdbc1ba08226b7323423f4ec83cc0802b58dec1b5e85",
+        "candidate_ids_sha256": "121ca7b67d36ab7a5d1a455b86c1aa9275c66eb5f9466a847db666faa7df0a14",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cuda",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "BLIS_NUM_THREADS": "1"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        },
+        "gpu": {
+          "name": "NVIDIA A100-PCIE-40GB",
+          "total_memory_bytes": 42411098112,
+          "compute_capability": "8.0",
+          "visible_device_index": 0,
+          "cupy": "13.6.0",
+          "cuda_runtime": 12090,
+          "cuda_driver": 12050,
+          "cublas_math_mode": 0
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 2048,
+        "k": 64,
+        "case_id": "n10000-p128-c2048-k64",
+        "device": "cpu",
+        "seed": 44,
+        "threads": 8,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "keys",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cpu",
+        "validation": "checked"
+      },
+      "seconds": [
+        5.7472437848336995,
+        5.7624194282107055,
+        5.750456248875707,
+        5.773733331821859,
+        5.755962241906673
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 5.7530365493148565,
+      "median_seconds": 5.755962241906673,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.9895196601282805e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "144eb4d4fbad2ed6b3fc88a9452b24ac87cf7c9ad6edaeda45b946b7df55e516",
+        "scores_sha256": "3c87e4a8dee5165d184d02ebfb167c3d1ab64fce22e69bb7b5a463d10bf5565e",
+        "candidate_ids_sha256": "3926b2f3fc19a65f7d5997f2434c952b975f92bfe277bbd1e702ad458f90001e",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cpu",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "VECLIB_MAXIMUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "BLIS_NUM_THREADS": "8"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 8192,
+        "k": 64,
+        "case_id": "n10000-p128-c8192-k64",
+        "device": "cpu",
+        "seed": 42,
+        "threads": 8,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "keys",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cpu",
+        "validation": "checked"
+      },
+      "seconds": [
+        22.52204739395529,
+        22.599049723241478,
+        22.367789237760007,
+        22.349467298947275,
+        22.370619252789766
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 22.508393248077482,
+      "median_seconds": 22.370619252789766,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 2.1316282072803006e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "b910efbb82ba71e20494f04ae5cce952590f3eeb786d0538a66599aa13d2d51b",
+        "scores_sha256": "847eb1b82aba4902461a7c27ff610c49ffabcdbcebf3bd38a1d1b09c68e01025",
+        "candidate_ids_sha256": "fe5e3edd1a5865709d751546ccce7cd1ab4a8986cd9f235acb90bb518e96ef1f",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cpu",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "VECLIB_MAXIMUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "BLIS_NUM_THREADS": "8"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 8192,
+        "k": 64,
+        "case_id": "n10000-p128-c8192-k64",
+        "device": "cuda",
+        "seed": 42,
+        "threads": 1,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "repair",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cuda-qr",
+        "validation": "deferred"
+      },
+      "seconds": [
+        0.036571552976965904,
+        0.03651404334232211,
+        0.036434497218579054,
+        0.0379429729655385,
+        0.03667283011600375
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 1.8856925391592085,
+      "median_seconds": 0.036571552976965904,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.8474111129762605e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "5ae4f2068beae0f792116e05d2b877acc0dba3d11366f9d5ddbb4bfa331c97b3",
+        "scores_sha256": "764f04eba8be1db49080d7f41e0f757a429cb6491cd08313427bdcaa9a51bb17",
+        "candidate_ids_sha256": "cfa47cfbde141dca6ca906102897333573c7de1d6e579fea2d17b5cd2cfa5563",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cuda",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "BLIS_NUM_THREADS": "1"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        },
+        "gpu": {
+          "name": "NVIDIA A100-PCIE-40GB",
+          "total_memory_bytes": 42411098112,
+          "compute_capability": "8.0",
+          "visible_device_index": 0,
+          "cupy": "13.6.0",
+          "cuda_runtime": 12090,
+          "cuda_driver": 12050,
+          "cublas_math_mode": 0
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 8192,
+        "k": 64,
+        "case_id": "n10000-p128-c8192-k64",
+        "device": "cuda",
+        "seed": 43,
+        "threads": 1,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "repair",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cuda-qr",
+        "validation": "deferred"
+      },
+      "seconds": [
+        0.037050044629722834,
+        0.037227083928883076,
+        0.03708026697859168,
+        0.0369778941385448,
+        0.03715938189998269
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 2.1936803981661797,
+      "median_seconds": 0.03708026697859168,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 2.1316282072803006e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "fccceb8098ae1116d0f02866a7677c67a10ab33afc8b15c93fa2e7fbc8314fe8",
+        "scores_sha256": "1da46ee75d6476f40a31cbbe147e34434914902b7f7504d06b8cb2974352e1de",
+        "candidate_ids_sha256": "ce04fc6dcb36df55003e1279aca292965be454f5f5c4f870a06eb1535404d1bf",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cuda",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "BLIS_NUM_THREADS": "1"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        },
+        "gpu": {
+          "name": "NVIDIA A100-PCIE-40GB",
+          "total_memory_bytes": 42411098112,
+          "compute_capability": "8.0",
+          "visible_device_index": 0,
+          "cupy": "13.6.0",
+          "cuda_runtime": 12090,
+          "cuda_driver": 12050,
+          "cublas_math_mode": 0
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 8192,
+        "k": 64,
+        "case_id": "n10000-p128-c8192-k64",
+        "device": "cpu",
+        "seed": 43,
+        "threads": 8,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "keys",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cpu",
+        "validation": "checked"
+      },
+      "seconds": [
+        22.32774873636663,
+        22.192901742178947,
+        22.08107829093933,
+        22.19321458088234,
+        22.583459684159607
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 22.504748636856675,
+      "median_seconds": 22.19321458088234,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.7053025658242404e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "905b7924f7a35a58a809978a8d1cd340322c3ea3b79a1b4f753c999436762878",
+        "scores_sha256": "3cf0c4e59c739a3889ca7a11ce373e43aad934efe1b99dfef3f700c631d0a7a0",
+        "candidate_ids_sha256": "bd978db94907c9ec2df281b5e086d9328b21606f0109039083ad1abe10cc7c46",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cpu",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "VECLIB_MAXIMUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "BLIS_NUM_THREADS": "8"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 8192,
+        "k": 64,
+        "case_id": "n10000-p128-c8192-k64",
+        "device": "cpu",
+        "seed": 44,
+        "threads": 8,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "keys",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cpu",
+        "validation": "checked"
+      },
+      "seconds": [
+        22.663489343132824,
+        22.667190997861326,
+        22.670041141100228,
+        22.6646482180804,
+        22.65840127505362
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 22.740118715912104,
+      "median_seconds": 22.6646482180804,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.7053025658242404e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "bb85f3aff7ad7483e114d6364c00ba2103bed8e2955638d09cf7db7d8375d4a0",
+        "scores_sha256": "87056c10b37a4080185f25e244e0a0d1471e78ba0b3512dc6e58cc3c98ef7627",
+        "candidate_ids_sha256": "ee37d57db5366e0b6ce6bf88e71f2492dc1318cdc9979ff9b7f91ef793d05e23",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cpu",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "8",
+          "OPENBLAS_NUM_THREADS": "8",
+          "MKL_NUM_THREADS": "8",
+          "VECLIB_MAXIMUM_THREADS": "8",
+          "NUMEXPR_NUM_THREADS": "8",
+          "BLIS_NUM_THREADS": "8"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        }
+      }
+    },
+    {
+      "status": "completed",
+      "config": {
+        "n": 10000,
+        "p": 128,
+        "n1": 5000,
+        "candidates": 8192,
+        "k": 64,
+        "case_id": "n10000-p128-c8192-k64",
+        "device": "cuda",
+        "seed": 44,
+        "threads": 1,
+        "batch_size": 2048,
+        "warmup": 2,
+        "repeats": 5,
+        "precision": "fp64",
+        "criterion": "full_covariance_ddof1",
+        "whitening": "pre",
+        "sampler": "repair",
+        "balance": "gemm",
+        "selection": "all",
+        "prepare_backend": "cuda-qr",
+        "validation": "deferred"
+      },
+      "seconds": [
+        0.037019968032836914,
+        0.03710691910237074,
+        0.037052387837320566,
+        0.037033529952168465,
+        0.03707272605970502
+      ],
+      "phase": "done",
+      "source_sha256": {
+        "benchmark.py": "44f0c1a91920b87b9ff3ab30f4d0b4e633abb93dfb95ded86975504c718efee7",
+        "flashrerand/__init__.py": "90ee42c73a4eb0649297edef03f0c6ee6cd8280d2a5014f902ede2cd172f80d2",
+        "flashrerand/arrays.py": "f3ebb25706acdaf65fb51f00e419dfe0767348bef20fd5b66e313374fd9c494c",
+        "flashrerand/core.py": "b42876fc54e0234edf9f2e6fd9f6db54cf2bb2c172a7ce89309195776051ab9e",
+        "flashrerand/cuda_backend.py": "6c7d82e894d6fe5340285ff1745f2204167d0adacc5928da84a9de1735bf52e2",
+        "flashrerand/engine.py": "69afc28356b87ddce9c42a9b7acf4d9f3063fb7d98bbe0d60d89732025ec350e",
+        "flashrerand/generated_gemm.py": "12e0402905d94412a5c4032715ce3734040afd5028f662e34171227b8608258b",
+        "flashrerand/rng.py": "19502691beee5ee3381201636429a015ab7a8386f90ab74ebb5e834c46eeebff",
+        "flashrerand/samplers.py": "249be340fdb98e1bd938c6c39ee04fe6fb8b7801fbfcaa8e952091b1f7bc4464",
+        "flashrerand/selection.py": "67cbead8f0f3dac5661edab5b8f60ef602532aecfa56094a13793e746231df5f",
+        "flashrerand/kernels.cu": "e45d25ef7a9aaf53f648da7c14485291d4338928d6d1dccbe59c42145d42a24c"
+      },
+      "package_version": "0.1.0",
+      "input_sha256": "6957570df32952002c4e2c32bb15260111ae3cfb7a4cacd732211c5f45f178ca",
+      "first_call_seconds": 2.086091899778694,
+      "median_seconds": 0.037052387837320566,
+      "validation": {
+        "status": "passed",
+        "count": 64,
+        "atol": 1e-10,
+        "rtol": 1e-11,
+        "max_abs_error": 1.8474111129762605e-13,
+        "binary_fixed_count": true,
+        "host_output": true,
+        "own_score_order_exact": true,
+        "assignments_sha256": "35facf4eea57fc037205412c2a778572a7f2539f29c7609d2c6f8ec18fd48206",
+        "scores_sha256": "5a0f2647e3ee44ee8638da4757f43df05bf6755dfd44c936b7d0cd9c5887dcff",
+        "candidate_ids_sha256": "79f63f948356e7ae74d76611f3b5623e8976500848cf257717a4daab8f82f961",
+        "scope": "selected assignments only; not certification of complete candidate-pool Top-K ranking"
+      },
+      "environment": {
+        "python": "3.12.13",
+        "os": "Linux",
+        "architecture": "x86_64",
+        "cpu_model": "Intel(R) Xeon(R) Gold 6342 CPU @ 2.80GHz",
+        "numpy": "1.26.4",
+        "device": "cuda",
+        "thread_environment": {
+          "OMP_NUM_THREADS": "1",
+          "OPENBLAS_NUM_THREADS": "1",
+          "MKL_NUM_THREADS": "1",
+          "VECLIB_MAXIMUM_THREADS": "1",
+          "NUMEXPR_NUM_THREADS": "1",
+          "BLIS_NUM_THREADS": "1"
+        },
+        "threadpools": null,
+        "threadpool_note": "threadpoolctl unavailable; environment limits are recorded, actual thread counts unverified",
+        "blas": {
+          "blas": {
+            "name": "openblas64",
+            "version": "0.3.23.dev"
+          },
+          "lapack": {
+            "name": "dep140551260102944",
+            "version": "1.26.4"
+          }
+        },
+        "gpu": {
+          "name": "NVIDIA A100-PCIE-40GB",
+          "total_memory_bytes": 42411098112,
+          "compute_capability": "8.0",
+          "visible_device_index": 0,
+          "cupy": "13.6.0",
+          "cuda_runtime": 12090,
+          "cuda_driver": 12050,
+          "cublas_math_mode": 0
+        }
+      }
+    }
+  ],
+  "protocol": {
+    "cases": [
+      [
+        1024,
+        16,
+        1024,
+        32
+      ],
+      [
+        10000,
+        128,
+        2048,
+        64
+      ],
+      [
+        10000,
+        128,
+        8192,
+        64
+      ]
+    ],
+    "devices": [
+      "cpu",
+      "cuda"
+    ],
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "data_seed": 2026,
+    "input_generator": "numpy.default_rng(2026).standard_normal((n,p)), FP64",
+    "warmup": 2,
+    "repeats": 5,
+    "cpu_threads_candidates": [
+      1,
+      8
+    ],
+    "cpu_batch_candidates": [
+      512,
+      2048
+    ],
+    "gpu_batch_size": 2048,
+    "gpu_host_threads": 1,
+    "gpu_selection": "CUDA_VISIBLE_DEVICES=0; no other benchmark process should run concurrently",
+    "timing_scope": "host X through validation, preparation, sampling, scoring, selection and complete host W/scores/IDs",
+    "excluded_from_timing": [
+      "process/import startup",
+      "input generation",
+      "untimed oracle",
+      "file I/O"
+    ],
+    "first_call_scope": "process-first API call after imports and backend synchronization; module/NVRTC disk caches may exist, so this is not guaranteed cold compilation; recorded separately before additional warmups",
+    "cpu_method": "NumPy vectorized random keys + GEMM; checked full API",
+    "cuda_method": "CUDA repair sampling + cuBLAS GEMM; deferred full API",
+    "comparability": "same statistical task and output contract; different samplers and candidate pools even at the same seed",
+    "aggregation": "within-seed median, then median of three seed medians; ratio is median of paired seed ratios",
+    "oracle_scope": "selected outputs only; complete-pool correctness is tested separately",
+    "order": "serial fresh child processes; alternate CPU/CUDA order by case and seed",
+    "tuning_rule": "one representative case; minimum CPU median, ties prefer fewer threads then smaller batch; freeze globally"
+  },
+  "summary": [
+    {
+      "case_id": "n1024-p16-c1024-k32",
+      "n": 1024,
+      "p": 16,
+      "candidates": 1024,
+      "k": 32,
+      "devices": {
+        "cpu": {
+          "seed_medians_seconds": {
+            "42": 0.21298908907920122,
+            "43": 0.22613097913563251,
+            "44": 0.21825300436466932
+          },
+          "median_seconds": 0.21825300436466932,
+          "min_seed_median_seconds": 0.21298908907920122,
+          "max_seed_median_seconds": 0.22613097913563251
+        },
+        "cuda": {
+          "seed_medians_seconds": {
+            "42": 0.005136932712048292,
+            "43": 0.004433392081409693,
+            "44": 0.004513294901698828
+          },
+          "median_seconds": 0.004513294901698828,
+          "min_seed_median_seconds": 0.004433392081409693,
+          "max_seed_median_seconds": 0.005136932712048292
+        }
+      },
+      "paired_seed_cpu_over_cuda": {
+        "42": 41.46230854448438,
+        "43": 51.00631186757777,
+        "44": 48.35779826452682
+      },
+      "median_paired_ratio": 48.35779826452682
+    },
+    {
+      "case_id": "n10000-p128-c2048-k64",
+      "n": 10000,
+      "p": 128,
+      "candidates": 2048,
+      "k": 64,
+      "devices": {
+        "cpu": {
+          "seed_medians_seconds": {
+            "42": 5.727417361922562,
+            "43": 5.82974598929286,
+            "44": 5.755962241906673
+          },
+          "median_seconds": 5.755962241906673,
+          "min_seed_median_seconds": 5.727417361922562,
+          "max_seed_median_seconds": 5.82974598929286
+        },
+        "cuda": {
+          "seed_medians_seconds": {
+            "42": 0.031443364918231964,
+            "43": 0.032792076934129,
+            "44": 0.04278685012832284
+          },
+          "median_seconds": 0.032792076934129,
+          "min_seed_median_seconds": 0.031443364918231964,
+          "max_seed_median_seconds": 0.04278685012832284
+        }
+      },
+      "paired_seed_cpu_over_cuda": {
+        "42": 182.150268484834,
+        "43": 177.77910197647276,
+        "44": 134.52643100961765
+      },
+      "median_paired_ratio": 177.77910197647276
+    },
+    {
+      "case_id": "n10000-p128-c8192-k64",
+      "n": 10000,
+      "p": 128,
+      "candidates": 8192,
+      "k": 64,
+      "devices": {
+        "cpu": {
+          "seed_medians_seconds": {
+            "42": 22.370619252789766,
+            "43": 22.19321458088234,
+            "44": 22.6646482180804
+          },
+          "median_seconds": 22.370619252789766,
+          "min_seed_median_seconds": 22.19321458088234,
+          "max_seed_median_seconds": 22.6646482180804
+        },
+        "cuda": {
+          "seed_medians_seconds": {
+            "42": 0.036571552976965904,
+            "43": 0.03708026697859168,
+            "44": 0.037052387837320566
+          },
+          "median_seconds": 0.037052387837320566,
+          "min_seed_median_seconds": 0.036571552976965904,
+          "max_seed_median_seconds": 0.03708026697859168
+        }
+      },
+      "paired_seed_cpu_over_cuda": {
+        "42": 611.694539383646,
+        "43": 598.5181982021761,
+        "44": 611.6919729327595
+      },
+      "median_paired_ratio": 611.6919729327595
+    }
+  ],
+  "finished_utc": "2026-10-03T07:25:01.612095+00:00"
+}

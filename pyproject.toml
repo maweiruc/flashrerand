@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flashrerand"
+version = "0.1.0"
+description = "FP64 fixed-budget rerandomization with NumPy and CUDA"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24,<3"]
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+
+[project.optional-dependencies]
+cuda12 = ["cupy-cuda12x==13.6.0"]
+benchmark = ["matplotlib>=3.8,<4"]
+
+[tool.setuptools.packages.find]
+include = ["flashrerand*"]
+
+[tool.setuptools.package-data]
+flashrerand = ["*.cu"]
