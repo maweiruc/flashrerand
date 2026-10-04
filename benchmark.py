@@ -686,7 +686,7 @@ def plot(args):
     import matplotlib.pyplot as plt
     from matplotlib.ticker import FuncFormatter
 
-    has_baseline = "v0" in report["protocol"]["implementations"]
+    has_baseline = "v0" in report["protocol"]["implementations"] and not args.cpu_gpu_only
     if has_baseline:
         fig, (ax, version_ax) = plt.subplots(2, 1, figsize=(10.6, 8.2),
             gridspec_kw={"height_ratios": [3, 1.15]}, sharex=True)
@@ -733,7 +733,7 @@ def plot(args):
         version_ax.spines[["top", "right"]].set_visible(False)
         version_ax.grid(axis="y", alpha=.2)
         version_ax.set_axisbelow(True)
-    ax.set_title("FP64 rerandomization: NumPy baseline and CUDA", loc="left", pad=17, fontweight="bold")
+    ax.set_title("FP64 rerandomization: NumPy CPU and CUDA", loc="left", pad=17, fontweight="bold")
     ax.spines[["top", "right"]].set_visible(False)
     ax.grid(axis="y", which="major", alpha=.2)
     ax.set_axisbelow(True)
@@ -745,7 +745,7 @@ def plot(args):
     hardware = cpu_row["environment"]["cpu_model"] + " · " + gpu_row["environment"]["gpu"]["name"]
     fig.text(.08, .045, hardware, fontsize=8)
     note = "Bars: median of 3 seed medians; dots: seed medians (5 repetitions each). Different CPU/GPU samplers; same budget and host output."
-    if report["protocol"].get("gpu_version_pairing"):
+    if has_baseline and report["protocol"].get("gpu_version_pairing"):
         note += "\nGPU versions share one process and alternate call order; ratios use paired seed medians."
     fig.text(.08, .015, note, fontsize=7.5)
     fig.tight_layout(rect=(0, .10, 1, 1))
@@ -766,6 +766,8 @@ def main(argv=None):
                         help="optional frozen V0 source directory for newly measured version comparisons")
     drawing = commands.add_parser("plot", help="render an existing completed result; requires Matplotlib")
     drawing.add_argument("input", type=Path)
+    drawing.add_argument("--cpu-gpu-only", action="store_true",
+                         help="show only the CPU/CUDA panel without changing recorded measurements")
     drawing.add_argument("--output", type=Path, required=True, help="new .svg, .png, or other Matplotlib-supported file")
     commands.add_parser("_worker", help=argparse.SUPPRESS)
     commands.add_parser("_gpu_pair_worker", help=argparse.SUPPRESS)

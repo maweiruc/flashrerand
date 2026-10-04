@@ -51,9 +51,8 @@ repair-fused. Unsupported combinations and unavailable CUDA raise errors.
 ## Performance
 
 CPU/GPU speedups range from 40.97× to 583.15× across these four measured tasks.
-The separate V0 comparison includes small gains and losses.
 
-![Complete API latency and FlashRerand V0 comparison](assets/performance.svg)
+![Complete API latency: CPU and GPU](assets/performance.svg)
 
 Measured calls include preprocessing and full host output. Hardware: Xeon Gold 6342
 and A100-PCIE-40GB; batch size 2048. CPU uses keys + GEMM with an 8-thread limit;
@@ -61,10 +60,9 @@ GPU uses repair + AUTO/GEMM with a 1-thread host limit. Actual thread-pool metad
 is included where available. Equal seeds do not imply equal CPU/GPU candidate pools.
 
 Seeds 42/43/44 each use 2 warmups and 5 measured calls. CPU/GPU blocks run serially
-in alternating order. GPU versions share one process and interleave mirrored call
-orders. First calls are separate; shared libraries and disk caches may already be
-warm. Bars show medians of seed medians; ratios use paired seed medians.
-V0 means FlashRerand 0.1.0. [Raw timings and environment](assets/benchmark.json).
+in alternating order. First calls are separate; shared libraries and disk caches
+may already be warm. Bars show medians of seed medians; ratios use paired seed
+medians. [Raw timings and environment](assets/benchmark.json).
 
 ## Tests and reproduction
 
@@ -76,9 +74,7 @@ python -m unittest discover -s tests -v
 FLASHRERAND_REQUIRE_CUDA=1 python -m unittest discover -s tests -v
 python -m pip install ".[benchmark]"  # Optional Matplotlib
 python benchmark.py run --output results/benchmark.json
-# Optional newly measured V0 comparison:
-python benchmark.py run --baseline-source /path/to/frozen-v0 --output results/with-v0.json
-python benchmark.py plot results/with-v0.json --output results/performance.svg
+python benchmark.py plot results/benchmark.json --cpu-gpu-only --output results/performance.svg
 ```
 
 Use `--smoke --cpu-only` for a small CPU trial. Choose new output paths;
