@@ -67,7 +67,7 @@ equal CPU/GPU candidate pools.
 Seeds 42/43/44 each use 2 warmups and 5 measured calls. CPU/GPU blocks run serially
 in alternating order. First calls are recorded separately. Bars show medians of
 seed medians; ratios use paired seed medians.
-[Raw timings and environment](assets/benchmark.json).
+[Benchmark data](assets/benchmark.json).
 
 ## Tests and reproduction
 
