@@ -6,11 +6,11 @@ GPU-accelerated rerandomization in Python. Generate a fixed budget of assignment
 each treating exactly `n1` units, and return the global best `k` by full-covariance
 Mahalanobis balance: $M=\frac{n_1(n-n_1)}{n}\Delta^\top S^{-1}\Delta$ in FP64,
 where $\Delta=\bar X_T-\bar X_C$ and $S$ is the sample covariance (`ddof=1`).
-Lower is better; exact ties use candidate IDs. Set `k=1` for best-choice fixed-budget search.
+Lower scores indicate better balance; exact ties use candidate IDs.
 
-FlashRerand provides three GPU execution paths: GEMM, Packed, and Fused. Its "Flash"
-design emphasizes compact assignment storage, covariate-tile reuse, and fused
-sampling and scoring. The Fused path avoids writing candidate assignment batches
+FlashRerand offers GEMM, Packed, and experimental Fused GPU backends. Its "Flash"
+design uses bit-packed assignments and covariate-tile reuse in Packed, and combines
+sampling with scoring in Fused. Fused avoids writing candidate assignment batches
 to global memory and reconstructs only the selected results.
 
 ## Install
@@ -38,8 +38,9 @@ print(result.scores[:5], result.candidate_ids[:5])
 print(result.metadata["execution"])  # Actual routes, policy and hardware
 ```
 
-Use `device="cpu"` for CPU execution, `k=1` for one result, or `backend="packed"`
-to force Packed on CUDA. Results include host NumPy arrays, metadata and timings.
+Use `device="cpu"` for CPU execution, `k=1` for best-choice search, or
+`backend="packed"` to force Packed on CUDA. Results include host NumPy arrays,
+metadata and timings.
 
 | Device | Sampler | Backend |
 |---|---|---|
@@ -48,46 +49,9 @@ to force Packed on CUDA. Results include host NumPy arrays, metadata and timings
 | CUDA | `auto`, `repair` | `fused`: experimental; n ≤ 1024, p ≤ 32 |
 | CUDA | `sequential` | `auto`, `gemm`; `fused`: experimental, p ≤ 1024 |
 
-**In 0.2.0, backend AUTO conservatively uses GEMM everywhere.** Packed is available
-by explicit override. Sampler AUTO means repair on CUDA and keys on CPU; backend
-selection never changes it. CUDA `sampler="auto", backend="fused"` therefore uses
-repair-fused. Unsupported combinations and unavailable CUDA raise errors.
-
-```mermaid
-flowchart TD
-    X["Input X and design parameters"] --> P["Validate and preprocess<br/>Full covariance · FP64 whitening"]
-    P --> ROUTES
-
-    subgraph ROUTES["Sampler and backend"]
-        direction TB
-        D{"Device"}
-        D -->|CPU| C["Sampler: keys<br/>auto default"]
-        D -->|CUDA| G{"Resolve sampler"}
-        G -->|auto / repair| R["repair"]
-        G -->|sequential| S["sequential"]
-
-        C --> CG["CPU GEMM"]
-        R --> GM["GPU GEMM<br/>Dense assignments"]
-        R --> PK["Packed<br/>Direct packed assignments + tiled scoring"]
-        R --> F["Fused · experimental<br/>Sampling + scoring<br/>No global assignment batch"]
-        S --> GM
-        S --> F
-
-        CG --> SCORES["Candidate scores"]
-        GM --> SCORES
-        PK --> SCORES
-        F --> SCORES
-    end
-
-    ROUTES --> K["Global Top-K"]
-    K --> O["Gather or replay selected assignments"]
-    O --> H["Return host arrays<br/>scores · candidate IDs · metadata · timings"]
-```
-
-Sampler nodes identify the selected strategy. Fused performs sampling inside its
-scoring kernel: repair-fused keeps packed membership in shared memory, while
-sequential-fused generates assignments on the fly. In 0.2.0, `backend="auto"`
-selects GEMM without changing the sampler.
+`sampler="auto"` selects keys on CPU and repair on CUDA. **In 0.2.0,
+`backend="auto"` always selects GEMM.** Backend selection never changes the sampler.
+Unsupported combinations and unavailable CUDA raise errors.
 
 ## Performance
 
@@ -97,13 +61,13 @@ CPU/GPU speedups range from 40.97× to 583.15× across these four measured tasks
 
 Measured calls include preprocessing and full host output. Hardware: Xeon Gold 6342
 and A100-PCIE-40GB; batch size 2048. CPU uses keys + GEMM with an 8-thread limit;
-GPU uses repair + AUTO/GEMM with a 1-thread host limit. Actual thread-pool metadata
-is included where available. Equal seeds do not imply equal CPU/GPU candidate pools.
+GPU uses repair + AUTO/GEMM with a 1-thread host limit. Equal seeds do not imply
+equal CPU/GPU candidate pools.
 
 Seeds 42/43/44 each use 2 warmups and 5 measured calls. CPU/GPU blocks run serially
-in alternating order. First calls are separate; shared libraries and disk caches
-may already be warm. Bars show medians of seed medians; ratios use paired seed
-medians. [Raw timings and environment](assets/benchmark.json).
+in alternating order. First calls are recorded separately. Bars show medians of
+seed medians; ratios use paired seed medians.
+[Raw timings and environment](assets/benchmark.json).
 
 ## Tests and reproduction
 
