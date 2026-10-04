@@ -113,6 +113,67 @@ extern "C" __global__ void repair_counts(
     }
 }
 
+// PK1: each thread writes one Philox word as at most four little-endian bytes.
+// Byte stores are intentional: a packed row is not necessarily word-aligned.
+#ifdef FLASHRERAND_PK1
+extern "C" __global__ void generate_packed_fair_bits(
+    const uint64_t* ids, uint64_t seed, int n, int count, unsigned char* packed) {
+    int width = int((uint64_t(n) + 7) / 8);
+    int words = int((uint64_t(n) + 31) / 32);
+    uint64_t word = uint64_t(blockIdx.x) * blockDim.x + threadIdx.x;
+    uint64_t size = uint64_t(words) * count;
+    for (; word < size; word += uint64_t(gridDim.x) * blockDim.x) {
+        uint64_t b = word / words;
+        uint32_t group = uint32_t(word % words);
+        uint32_t bits = philox(seed, ids[b], group, 3, 0).x;
+        for (int byte = 0; byte < 4; ++byte) {
+            int j = int(group * 4) + byte;
+            if (j >= width) break;
+            uint32_t value = (bits >> (byte * 8)) & 0xFFu;
+            int valid = n - j * 8;
+            if (valid < 8) value &= (1u << valid) - 1u;
+            packed[b * width + j] = (unsigned char)value;
+        }
+    }
+}
+
+extern "C" __global__ void count_packed_rows(
+    const unsigned char* packed, int n, int count, int64_t* counts) {
+    int width = int((uint64_t(n) + 7) / 8);
+    uint64_t b = uint64_t(blockIdx.x) * blockDim.x + threadIdx.x;
+    for (; b < uint64_t(count); b += uint64_t(gridDim.x) * blockDim.x) {
+        int current = 0;
+        for (int j = 0; j < width; ++j)
+            current += __popc(uint32_t(packed[b * width + j]));
+        counts[b] = current;
+    }
+}
+
+extern "C" __global__ void repair_packed_counts(
+    const uint64_t* ids, uint64_t seed, int n, int n1, int count,
+    const int64_t* counts, unsigned char* packed, uint32_t* error) {
+    int width = int((uint64_t(n) + 7) / 8);
+    uint64_t b = uint64_t(blockIdx.x) * blockDim.x + threadIdx.x;
+    for (; b < uint64_t(count); b += uint64_t(gridDim.x) * blockDim.x) {
+        int current = int(counts[b]);
+        uint64_t trial = 0;
+        while (current != n1) {
+            if (trial >= (uint64_t(1) << 32)) {
+                atomicMax(error, 2u);
+                return;
+            }
+            uint32_t i = bounded(seed, ids[b], uint32_t(trial), 4, uint32_t(n), error);
+            ++trial;
+            unsigned char* value = packed + b * width + i / 8;
+            unsigned char mask = (unsigned char)(1u << (i % 8));
+            bool take = (*value & mask) != 0;
+            if (current > n1 && take) { *value &= (unsigned char)~mask; --current; }
+            else if (current < n1 && !take) { *value |= mask; ++current; }
+        }
+    }
+}
+#endif
+
 extern "C" __global__ void pack_rows(
     const unsigned char* w, unsigned char* packed, int n, int count) {
     uint64_t index = uint64_t(blockIdx.x) * blockDim.x + threadIdx.x;
@@ -208,6 +269,180 @@ template<typename T, bool Packed> __global__ void score_tiled(
     norm = warp_sum(norm);
     if (b < count && lane == 0) output[b] = scale * norm;
 }
+
+// PK0 bounded variants. Keep the baseline score_tiled symbol above untouched.
+// Every candidate completes each coordinate across ALL subjects before its
+// square enters the norm; candidate-tail warps still join every CTA barrier.
+template<typename T, bool Packed, int Candidates, int Subjects>
+__global__ void score_tiled_variant(
+    const unsigned char* w, const T* z, const T* correction,
+    int n, int p, int n1, int count, T scale, T* output) {
+    static_assert(Candidates == 4 || Candidates == 8, "PK0 candidate tile");
+    static_assert(Subjects == 32 || Subjects == 64, "PK0 subject tile");
+    __shared__ T z_tile[Subjects * 32];
+    __shared__ unsigned char w_tile[Candidates * Subjects];
+    int lane = threadIdx.x & 31;
+    int warp = threadIdx.x / 32;
+    int b = blockIdx.x * Candidates + warp;
+    int width = Packed ? (n + 7) / 8 : n;
+    T norm = 0;
+    T pi = T(n1) / T(n);
+    for (int j0 = 0; j0 < p; j0 += 32) {
+        int j = j0 + lane;
+        T value = 0;
+        // Use a wide tile base so rounding to a 64-subject tile cannot overflow
+        // the signed subject bound supported by the original 32-subject path.
+        for (uint64_t i0 = 0; i0 < uint64_t(n); i0 += Subjects) {
+            for (int index = threadIdx.x; index < Subjects * 32;
+                 index += Candidates * 32) {
+                uint64_t i = i0 + index / 32;
+                int col = j0 + index % 32;
+                z_tile[index] = (i < uint64_t(n) && col < p)
+                    ? z[i * p + col] : T(0);
+            }
+            for (int row = lane; row < Subjects; row += 32) {
+                uint64_t i = i0 + row;
+                unsigned char bit = 0;
+                if (b < count && i < uint64_t(n)) {
+                    if (Packed)
+                        bit = (w[uint64_t(b) * width + i / 8] >> (i % 8)) & 1;
+                    else bit = w[uint64_t(b) * n + i];
+                }
+                w_tile[warp * Subjects + row] = bit;
+            }
+            __syncthreads();
+            for (int row = 0; row < Subjects; ++row)
+                if (w_tile[warp * Subjects + row])
+                    value += z_tile[row * 32 + lane];
+            __syncthreads();
+        }
+        if (j < p) {
+            value -= pi * correction[j];
+            norm += value * value;
+        }
+    }
+    norm = warp_sum(norm);
+    if (b < count && lane == 0) output[b] = scale * norm;
+}
+
+#ifdef FLASHRERAND_REPAIR_FUSED
+// Only the private exhaustion tests override these compile-time bounds.
+#ifndef FLASHRERAND_FUSED_ATTEMPT_MAX
+#define FLASHRERAND_FUSED_ATTEMPT_MAX 0xFFFFFFu
+#endif
+#ifndef FLASHRERAND_FUSED_TRIAL_LIMIT
+#define FLASHRERAND_FUSED_TRIAL_LIMIT (uint64_t(1) << 32)
+#endif
+#ifndef FLASHRERAND_FUSED_FORCE_REJECT
+#define FLASHRERAND_FUSED_FORCE_REJECT 0
+#endif
+
+// Unlike the legacy helper, failure is returned explicitly so the candidate
+// stops repairing without abandoning a block barrier or using a fallback draw.
+__device__ __forceinline__ bool fused_bounded_checked(
+    uint64_t seed, uint64_t candidate, uint32_t draw, uint32_t bound,
+    uint32_t* error, uint32_t& output) {
+    uint32_t threshold = (uint32_t(0) - bound) % bound;
+    uint32_t attempt = 0;
+    while (true) {
+        uint32_t raw = philox(seed, candidate, draw, 4, attempt).x;
+        if (!FLASHRERAND_FUSED_FORCE_REJECT && raw >= threshold) {
+            output = raw % bound;
+            return true;
+        }
+        if (attempt == FLASHRERAND_FUSED_ATTEMPT_MAX) {
+            atomicMax(error, 1u);
+            return false;
+        }
+        ++attempt;
+    }
+}
+
+// Repair-first prototype: the complete candidate state lives in shared memory.
+// Eight candidate warps reuse one 64x32 Z tile, matching C1's score order.
+// Production debug_packed is null; only scores and the sticky flag are written.
+extern "C" __global__ void score_fused_repair(
+    const uint64_t* ids, uint64_t seed, const double* z,
+    const double* correction, int n, int p, int n1, int count,
+    double scale, double* output, uint32_t* error,
+    unsigned char* debug_packed) {
+    __shared__ uint32_t membership[8][32];
+    __shared__ double z_tile[64 * 32];
+    __shared__ unsigned char w_tile[8 * 64];
+    __shared__ int failed[8];
+    int lane = threadIdx.x & 31;
+    int warp = threadIdx.x / 32;
+    int b = blockIdx.x * 8 + warp;
+    bool active = b < count;
+    uint32_t bits = 0;
+    int valid = n - lane * 32;
+    if (active && valid > 0) {
+        bits = philox(seed, ids[b], uint32_t(lane), 3, 0).x;
+        if (valid < 32) bits &= (1u << valid) - 1u;
+    }
+    membership[warp][lane] = bits;
+    int current = warp_sum(int(__popc(bits)));
+    __syncwarp();
+    if (lane == 0) {
+        failed[warp] = 0;
+        if (active) {
+            uint64_t trial = 0;
+            while (current != n1) {
+                if (trial >= FLASHRERAND_FUSED_TRIAL_LIMIT) {
+                    atomicMax(error, 2u);
+                    failed[warp] = 1;
+                    break;
+                }
+                uint32_t i;
+                if (!fused_bounded_checked(seed, ids[b], uint32_t(trial),
+                                           uint32_t(n), error, i)) {
+                    failed[warp] = 1;
+                    break;
+                }
+                ++trial;
+                uint32_t mask = 1u << (i % 32);
+                uint32_t& word = membership[warp][i / 32];
+                bool take = (word & mask) != 0;
+                if (current > n1 && take) { word &= ~mask; --current; }
+                else if (current < n1 && !take) { word |= mask; ++current; }
+            }
+        }
+    }
+    // All candidate tails and failed candidates continue through every barrier.
+    __syncthreads();
+    if (debug_packed && active) {
+        int width = (n + 7) / 8;
+        for (int byte = lane; byte < width; byte += 32)
+            debug_packed[uint64_t(b) * width + byte] =
+                (unsigned char)(membership[warp][byte / 4] >> (8 * (byte % 4)));
+    }
+    double value = 0;
+    for (int i0 = 0; i0 < n; i0 += 64) {
+        for (int index = threadIdx.x; index < 64 * 32; index += 256) {
+            int i = i0 + index / 32, col = index % 32;
+            z_tile[index] = (i < n && col < p) ? z[uint64_t(i) * p + col] : 0.0;
+        }
+        for (int row = lane; row < 64; row += 32) {
+            int i = i0 + row;
+            unsigned char bit = 0;
+            if (active && !failed[warp] && i < n)
+                bit = (membership[warp][i / 32] >> (i % 32)) & 1;
+            w_tile[warp * 64 + row] = bit;
+        }
+        __syncthreads();
+        for (int row = 0; row < 64; ++row)
+            if (w_tile[warp * 64 + row]) value += z_tile[row * 32 + lane];
+        __syncthreads();
+    }
+    double norm = 0;
+    if (lane < p) {
+        value -= (double(n1) / double(n)) * correction[lane];
+        norm += value * value;
+    }
+    norm = warp_sum(norm);
+    if (active && lane == 0) output[b] = failed[warp] ? 0.0 : scale * norm;
+}
+#endif
 
 template<typename T, int MaxP> __global__ void score_fused_sequential(
     const uint64_t* ids, uint64_t seed, const T* z, const T* correction,

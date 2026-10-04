@@ -107,7 +107,8 @@ def _prepare_spectrum(singular, n, p, condition_limit):
 
 def prepare(X, criterion="diagonal", precision="fp32", whitening="pre",
             method="cholesky", device="cpu", condition_limit=1e10,
-            prepare_backend="cpu", profile=False):
+            prepare_backend="cpu", profile=False, *, _compact=False,
+            _reuse_diagnostic_r=False, _overlap_fingerprint=False):
     """Prepare covariates with explicit CPU, hybrid CUDA, or CUDA QR backends.
 
 ``cpu`` retains CPU arithmetic and optionally transfers its result. ``cuda``
@@ -117,6 +118,13 @@ it retains CPU FP64 centering so the diagnostic matrix is unchanged. Near a
 rank/condition boundary it falls back to the original CPU SVD. No columns are
 dropped or regularized. ``profile=True`` instruments this call; benchmarks
 must invoke it separately from their uninstrumented timing passes.
+
+The private experimental flags apply only to full FP64 CUDA-QR preparation.
+``_compact`` omits the unused raw-X device copy; centered/whitened arrays still
+own their storage. ``_reuse_diagnostic_r`` uses a validated diagnostic R for
+triangular whitening, unless any diagnostic CPU fallback occurred.
+``_overlap_fingerprint`` schedules the unchanged host hash before the spectrum
+copy to host; whether work overlaps depends on the CUDA runtime and profiling.
 """
     if criterion not in ("diagonal", "full"):
         raise ValueError("criterion must be 'diagonal' or 'full'")
@@ -132,6 +140,15 @@ must invoke it separately from their uninstrumented timing passes.
         raise ValueError("CUDA prepare backends require device='cuda'")
     if not isinstance(profile, (bool, np.bool_)):
         raise TypeError("profile must be boolean")
+    for name, value in (("_compact", _compact),
+                        ("_reuse_diagnostic_r", _reuse_diagnostic_r),
+                        ("_overlap_fingerprint", _overlap_fingerprint)):
+        if not isinstance(value, (bool, np.bool_)):
+            raise TypeError(name + " must be boolean")
+    experimental = bool(_compact or _reuse_diagnostic_r or _overlap_fingerprint)
+    if experimental and (criterion != "full" or precision != "fp64" or
+                         device != "cuda" or prepare_backend != "cuda-qr"):
+        raise ValueError("experimental prepare flags require full FP64 CUDA-QR preparation")
     if isinstance(condition_limit, (bool, np.bool_)):
         raise TypeError("condition_limit must be a finite number >= 1")
     try:
@@ -163,25 +180,40 @@ must invoke it separately from their uninstrumented timing passes.
     fallback_reasons = []
     gpu_diagnostic_values = None
     diagnostic_qr_mode = None
+    input_fingerprint = None
+    fingerprint_before_spectrum = False
     condition_xc = condition_covariance = None
     if criterion == "full":
         if prepare_backend == "cuda-qr":
             from cupyx import errstate
             with timer.stage("diagnostic_transfer"):
                 gpu_centered64 = xp.asarray(np.ascontiguousarray(centered64))
-            with timer.stage("diagnostic_gpu_qr_svd"):
-                try:
+            try:
+                with timer.stage("diagnostic_gpu_qr_svd"):
                     with errstate(linalg="raise"):
                         # Only an FP64 QR whitening path can reuse Q. Other
                         # paths need R for the spectrum, so skip forming Q.
-                        diagnostic_qr_mode = "reduced" if precision == "fp64" and method == "qr" else "r"
+                        diagnostic_qr_mode = "reduced" if precision == "fp64" and method == "qr" and not _reuse_diagnostic_r else "r"
                         if diagnostic_qr_mode == "reduced":
                             diagnostic_q, diagnostic_r = xp.linalg.qr(gpu_centered64, mode="reduced")
                         else:
                             diagnostic_r = xp.linalg.qr(gpu_centered64, mode="r")
-                        singular = to_numpy(xp.linalg.svd(diagnostic_r, compute_uv=False))
-                except np.linalg.LinAlgError:
-                    fallback_reasons.append("gpu_qr_or_svd_failure")
+                        singular_device = xp.linalg.svd(diagnostic_r, compute_uv=False)
+                # No threads or extra synchronization in an ordinary call.
+                # Diagnostic profiling intentionally serializes these stages.
+                if _overlap_fingerprint:
+                    with timer.stage("input_fingerprint"):
+                        input_fingerprint = _input_fingerprint(X64)
+                    fingerprint_before_spectrum = True
+                with timer.stage("diagnostic_spectrum_transfer"):
+                    singular = to_numpy(singular_device)
+                if _reuse_diagnostic_r:
+                    with timer.stage("diagnostic_factor_validation"):
+                        if not bool(xp.all(xp.isfinite(diagnostic_r))):
+                            fallback_reasons.append("nonfinite_gpu_factor")
+            except np.linalg.LinAlgError:
+                fallback_reasons.append("gpu_qr_or_svd_failure")
+            with timer.stage("diagnostic_spectrum_validation"):
                 if singular is not None:
                     if singular.shape != (p,) or not np.all(np.isfinite(singular)):
                         fallback_reasons.append("nonfinite_gpu_spectrum")
@@ -208,8 +240,9 @@ must invoke it separately from their uninstrumented timing passes.
                 with timer.stage("diagnostic_cpu_fallback"):
                     singular = np.linalg.svd(centered64, compute_uv=False)
                 diagnostic_backend = "cpu_svd_fallback"
-                # A failed GPU factorization must not supply the working QR.
-                if "gpu_qr_or_svd_failure" in fallback_reasons or "nonfinite_gpu_spectrum" in fallback_reasons:
+                # P2 also excludes valid R near guarded boundaries. Its QR
+                # fallback recomputes the original reduced-Q whitening path.
+                if _reuse_diagnostic_r or "gpu_qr_or_svd_failure" in fallback_reasons or "nonfinite_gpu_spectrum" in fallback_reasons:
                     diagnostic_q = diagnostic_r = None
         else:
             with timer.stage("diagnostic_cpu_svd"):
@@ -220,12 +253,17 @@ must invoke it separately from their uninstrumented timing passes.
     dtype = np.dtype("float32" if precision == "fp32" else "float64")
     q = None
     qr_reused = False
+    r_whitening_reused = False
+    actual_method = method
     centering_device = "cpu" if work_xp is np else "cuda"
     centering_fallback = None
     centering_guard = float(1.0 / np.sqrt(np.finfo(dtype).eps))
     # When offsets dominate variation, different reduction trees can change
     # the working mean appreciably. Preserve the CPU path for those inputs.
-    large_offset = bool(np.any(np.max(np.abs(X64), axis=0) / np.sqrt(variances64) > centering_guard))
+    # Compact is restricted to the branch that always reuses CPU-centered
+    # FP64 input. Its offset scan cannot influence centering or diagnostics.
+    with timer.stage("working_offset_guard"):
+        large_offset = False if _compact else bool(np.any(np.max(np.abs(X64), axis=0) / np.sqrt(variances64) > centering_guard))
     typed_rank_backend = "not_required"
     typed_rank_tolerance = None
     typed_rank_fallback = []
@@ -237,7 +275,7 @@ must invoke it separately from their uninstrumented timing passes.
         linalg_errors = lambda: errstate(linalg="raise")
     with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
         with timer.stage("working_input_transfer"):
-            x = X64.astype(dtype) if work_xp is np else work_xp.asarray(X64, dtype=dtype)
+            x = None if _compact else (X64.astype(dtype) if work_xp is np else work_xp.asarray(X64, dtype=dtype))
         with timer.stage("working_centering"):
             if precision == "fp64" and work_xp is np:
                 xc = centered64
@@ -305,7 +343,11 @@ must invoke it separately from their uninstrumented timing passes.
                     factor = work_xp.diag(work_xp.sqrt(variance)).astype(dtype, copy=False)
                 else:
                     with linalg_errors():
-                        if method == "cholesky":
+                        if _reuse_diagnostic_r and diagnostic_r is not None and not fallback_reasons:
+                            factor = diagnostic_r.T / dtype.type(np.sqrt(n - 1))
+                            r_whitening_reused = True
+                            actual_method = "qr-r"
+                        elif method == "cholesky":
                             covariance = (xc.T @ xc) / dtype.type(n - 1)
                             if not bool(work_xp.all(work_xp.isfinite(covariance))):
                                 raise ValueError("covariance overflowed in the requested precision")
@@ -340,7 +382,12 @@ must invoke it separately from their uninstrumented timing passes.
             correction = work_xp.sum(z if z is not None else xc, axis=0, dtype=dtype)
             if not bool(work_xp.all(work_xp.isfinite(correction))):
                 raise ValueError("centering correction overflowed")
-    with timer.stage("metadata_and_fingerprint"):
+    with timer.stage("metadata_residual"):
+        max_abs_centering_residual = float(work_xp.max(work_xp.abs(xc.sum(axis=0))))
+    if input_fingerprint is None:
+        with timer.stage("input_fingerprint"):
+            input_fingerprint = _input_fingerprint(X64)
+    with timer.stage("metadata"):
         metadata = {
         "ddof": 0 if criterion == "diagonal" else 1,
         "score_normalization": "(n1*n0/n) * squared_standardized_mean_difference",
@@ -364,20 +411,29 @@ must invoke it separately from their uninstrumented timing passes.
         "working_precision_rank_gpu_spectrum": typed_rank_gpu_spectrum,
         "working_precision_rank_fallback": typed_rank_fallback,
         "qr_diagnostic_reused": qr_reused,
+        "diagnostic_r_whitening_reused": r_whitening_reused,
+        "requested_factorization": method,
+        "raw_input_retained": not bool(_compact),
+        "offset_scan_skipped": bool(_compact),
+        "experimental_prepare_flags": {
+            "compact": bool(_compact), "reuse_diagnostic_r": bool(_reuse_diagnostic_r),
+            "overlap_fingerprint": bool(_overlap_fingerprint),
+        },
+        "fingerprint_scheduling": "before_spectrum_copy" if fingerprint_before_spectrum else "after_working_arrays",
         "condition_xc": condition_xc,
         "condition_covariance": condition_covariance,
         "condition_limit": condition_limit,
         "correction_space": "whitened" if whitening == "pre" else "centered",
-        "max_abs_centering_residual": float(work_xp.max(work_xp.abs(xc.sum(axis=0)))),
-        "factorization": method if criterion == "full" else "diagonal",
-        "input_sha256": _input_fingerprint(X64),
+        "max_abs_centering_residual": max_abs_centering_residual,
+        "factorization": actual_method if criterion == "full" else "diagonal",
+        "input_sha256": input_fingerprint,
         }
         if cuda_math is not None:
             metadata["cuda_math"] = cuda_math
     with timer.stage("output_transfer_and_layout"):
         problem = PreparedProblem(
-            n, p, device, precision, criterion, whitening, method,
-            xp.asarray(work_xp.ascontiguousarray(x)), xp.asarray(work_xp.ascontiguousarray(xc)),
+            n, p, device, precision, criterion, whitening, actual_method,
+            None if x is None else xp.asarray(work_xp.ascontiguousarray(x)), xp.asarray(work_xp.ascontiguousarray(xc)),
             None if z is None else xp.asarray(z),
             xp.asarray(work_xp.ascontiguousarray(factor)), xp.asarray(correction), metadata,
         )

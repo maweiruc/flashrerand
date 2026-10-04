@@ -1,20 +1,20 @@
-# FlashRerand V0
+# FlashRerand
 
 ## Overview
 
 GPU-accelerated rerandomization in Python. Generate a fixed budget of assignments,
-with exactly `n1` treated units each, and return the global best `k` by
-full-covariance Mahalanobis balance (FP64, sample covariance with `ddof=1`).
-Set `k=1` for best-choice rerandomization; this is a fixed-budget search, not
-threshold-based acceptance. Lower scores are better; ties use candidate IDs.
+each treating exactly `n1` units, and return the global best `k` by full-covariance
+Mahalanobis balance: $M=\frac{n_1(n-n_1)}{n}\Delta^\top S^{-1}\Delta$ in FP64,
+where $\Delta=\bar X_T-\bar X_C$ and $S$ is the sample covariance (`ddof=1`).
+Lower is better; exact ties use candidate IDs. Set `k=1` for best-choice fixed-budget search.
 
 ## Install
 
-Python 3.10+. Choose CPU or CUDA (an NVIDIA GPU with CUDA 12.x is required):
+Python 3.10+. Install from this checkout; CUDA requires an NVIDIA GPU and CUDA 12.x.
 
 ```sh
-python -m pip install .             # CPU: NumPy
-python -m pip install ".[cuda12]"  # GPU: CuPy 13.6.0
+python -m pip install .              # CPU: NumPy only
+python -m pip install ".[cuda12]"     # GPU: CuPy 13.6.0
 ```
 
 ## Example
@@ -24,62 +24,71 @@ import numpy as np
 from flashrerand import rerandomize
 
 X = np.random.default_rng(2026).normal(size=(1024, 16))
-result = rerandomize(X, n1=512, candidates=1024, k=32,
-                    seed=42, device="cuda")
-
-print(result.assignments.shape)  # (32, 1024), each row has 512 treated units
-print(result.scores[:5])         # Lowest balance scores
+result = rerandomize(
+    X, n1=512, candidates=8192, k=64, seed=42, batch_size=2048,
+    device="cuda", sampler="auto", backend="auto",
+)
+print(result.assignments.shape)       # (64, 1024); each row treats 512 units
+print(result.scores[:5], result.candidate_ids[:5])
+print(result.metadata["execution"])  # Actual routes, policy and hardware
 ```
 
-Use `device="cpu"` for CPU execution. Results also include `candidate_ids` and
-`metadata`; all returned arrays reside on the host. CUDA unavailability raises
-an error. CPU and GPU use different samplers, so equal seeds do not imply equal
-candidate pools.
+Use `device="cpu"` for CPU execution, `k=1` for one result, or `backend="packed"`
+to force Packed on CUDA. Results include host NumPy arrays, metadata and timings.
+
+| Device | Sampler | Backend |
+|---|---|---|
+| CPU | `auto`, `keys` | `auto`, `gemm` |
+| CUDA | `auto`, `repair` | `auto`, `gemm`, `packed` |
+| CUDA | `auto`, `repair` | `fused`: experimental; n ≤ 1024, p ≤ 32 |
+| CUDA | `sequential` | `auto`, `gemm`; `fused`: experimental, p ≤ 1024 |
+
+**In 0.2.0, backend AUTO conservatively uses GEMM everywhere.** Packed is available
+by explicit override. Sampler AUTO means repair on CUDA and keys on CPU; backend
+selection never changes it. CUDA `sampler="auto", backend="fused"` therefore uses
+repair-fused. Unsupported combinations and unavailable CUDA raise errors.
 
 ## Performance
 
-**48.4–611.7× faster than the included NumPy baseline** in the three measured
-workloads below. These are complete API calls, including preparation and host
-output, not isolated kernel timings or comparisons against the fastest CPU tool.
+CPU/GPU speedups range from 40.97× to 583.15× across these four measured tasks.
+The separate V0 comparison includes small gains and losses.
 
-![FP64 rerandomization: NumPy baseline and CUDA](assets/performance.svg)
+![Complete API latency and FlashRerand V0 comparison](assets/performance.svg)
 
-Measured on a Xeon Gold 6342 and one A100 40 GB, using balanced allocation and
-normal covariates. CPU/GPU host thread limits were 8/1; active thread counts
-were not measured. CPU uses NumPy keys + GEMM; GPU uses repair + GEMM.
+Measured calls include preprocessing and full host output. Hardware: Xeon Gold 6342
+and A100-PCIE-40GB; batch size 2048. CPU uses keys + GEMM with an 8-thread limit;
+GPU uses repair + AUTO/GEMM with a 1-thread host limit. Actual thread-pool metadata
+is included where available. Equal seeds do not imply equal CPU/GPU candidate pools.
 
-Each seed (42, 43, 44) uses 2 warmups and 5 timed calls. Bars are medians of seed
-medians; speedups are medians of paired-seed ratios, which can differ from the
-ratio of displayed times. First calls are recorded separately, with caches
-possibly present. [Raw timings, settings and environment](assets/benchmark.json).
+Seeds 42/43/44 each use 2 warmups and 5 measured calls. CPU/GPU blocks run serially
+in alternating order. GPU versions share one process and interleave mirrored call
+orders. First calls are separate; shared libraries and disk caches may already be
+warm. Bars show medians of seed medians; ratios use paired seed medians.
+V0 means FlashRerand 0.1.0. [Raw timings and environment](assets/benchmark.json).
 
 ## Tests and reproduction
 
-All **13 tests passed on A100**, including GPU execution and compilation from an
-empty kernel cache. CPU-only checks also passed on macOS. Tests compare scores
-with an independent CPU formula (`atol=1e-10, rtol=1e-11`) and check small full
-candidate pools. Benchmark validation checks selected outputs only.
+Independent CPU score checks use `atol=1e-10, rtol=1e-11`. Tests cover fixed counts,
+replay, backend selection and bounded full pools; benchmarks validate selected outputs.
 
 ```sh
 python -m unittest discover -s tests -v
-# Require GPU coverage instead of allowing skipped CUDA tests:
 FLASHRERAND_REQUIRE_CUDA=1 python -m unittest discover -s tests -v
-
-python -m pip install ".[benchmark]"  # Optional plotting dependency
+python -m pip install ".[benchmark]"  # Optional Matplotlib
 python benchmark.py run --output results/benchmark.json
-python benchmark.py plot results/benchmark.json --output results/performance.svg
+# Optional newly measured V0 comparison:
+python benchmark.py run --baseline-source /path/to/frozen-v0 --output results/with-v0.json
+python benchmark.py plot results/with-v0.json --output results/performance.svg
 ```
 
-Add `--smoke` to `run` for a small trial. Use new output paths for each run;
-existing results are never overwritten. Keep `.private.log` diagnostics private.
+Use `--smoke --cpu-only` for a small CPU trial. Choose new output paths;
+existing results are not overwritten. Keep `.private.log` diagnostics private.
 
 ## Notes and license
 
-Inputs must be finite and have full column rank after centering, with
-`1 <= p < n-1`, `1 <= n1 < n`, and `1 <= k <= candidates`. Constant columns and
-covariance condition numbers above `1e10` are rejected; no ridge is added.
-Repeated assignments are allowed. Close scores may rank differently across
-floating-point paths. V0 uses one CUDA device; performance depends on hardware
-and workload. Internal module APIs are not stable public interfaces.
-
-[MIT License](LICENSE).
+Inputs must be finite and full rank after centering: `1 <= p < n-1`, `1 <= n1 < n`,
+`1 <= k <= candidates`. Constant columns and covariance condition numbers above
+`1e10` are rejected; no ridge is added. Repeated assignments are allowed. Repair
+routes share candidate addresses; close floating-point rankings can still differ.
+Sequential uses another candidate stream. One CUDA device is used per call;
+internal module APIs are unstable. [MIT License](LICENSE).

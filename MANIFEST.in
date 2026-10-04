@@ -1,0 +1,3 @@
+include benchmark.py
+include assets/benchmark.json
+include assets/performance.svg

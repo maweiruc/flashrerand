@@ -44,6 +44,43 @@ def _kernel(name):
     return _module(cp.cuda.runtime.getDevice()).get_function(name)
 
 
+@lru_cache(maxsize=None)
+def _tiled_module(device_id):
+    """Keep PK0 compilation separate from the unchanged default module."""
+    cp = _cupy()
+    names = [f"score_tiled_variant<double,{packed},{candidates},{subjects}>"
+             for packed in ("false", "true") for candidates in (4, 8)
+             for subjects in (32, 64)]
+    with cp.cuda.Device(device_id):
+        return cp.RawModule(code=Path(__file__).with_name("kernels.cu").read_text(),
+                            options=("--std=c++11", "--fmad=false"),
+                            name_expressions=names)
+
+
+@lru_cache(maxsize=None)
+def _packed_repair_module(device_id):
+    """Compile the opt-in PK1 sampler without warming the default module."""
+    cp = _cupy()
+    with cp.cuda.Device(device_id):
+        return cp.RawModule(code=Path(__file__).with_name("kernels.cu").read_text(),
+                            options=("--std=c++11", "--fmad=false", "-DFLASHRERAND_PK1"))
+
+
+@lru_cache(maxsize=None)
+def _repair_fused_module(device_id, limits=None):
+    """Isolate the production prototype from test-only exhaustion builds."""
+    cp = _cupy()
+    options = ["--std=c++11", "--fmad=false", "-DFLASHRERAND_REPAIR_FUSED"]
+    if limits is not None:
+        attempt_max, trial_limit, force_reject = limits
+        options += [f"-DFLASHRERAND_FUSED_ATTEMPT_MAX={attempt_max}u",
+                    f"-DFLASHRERAND_FUSED_TRIAL_LIMIT={trial_limit}ull",
+                    f"-DFLASHRERAND_FUSED_FORCE_REJECT={int(force_reject)}"]
+    with cp.cuda.Device(device_id):
+        return cp.RawModule(code=Path(__file__).with_name("kernels.cu").read_text(),
+                            options=tuple(options))
+
+
 def _integer(value, name, low, high):
     try:
         result = operator.index(value)
@@ -83,24 +120,37 @@ def _check_rng(error):
         raise RuntimeError(f"RNG replay address space exhausted (CUDA error {code})")
 
 
-def generate_cuda(n, n1, candidate_ids, seed, sampler="keys", *, _error_out=None):
+def generate_cuda(n, n1, candidate_ids, seed, sampler="keys", *, _error_out=None,
+                  _empty_output=False, _profile=None):
     """Generate fixed-count proposals as a C-contiguous uint8 (B, n) array.
 
     RNG: Philox4x32-10; counter=(ID.lo, ID.hi, draw, stage<<24|attempt).
     Keys join word0 as the low 32 bits and word1 as the high 32 bits.
     Repair starts from fair bits; it is primarily intended for near-1:1 ratios.
+    Internal G1 opts into uninitialized output only for kernels that overwrite
+    every valid entry. Keys always needs a zero-filled assignment buffer.
+    A diagnostic callback _profile(name, fn) must execute fn and return its
+    result. No additional synchronization is performed when it is None.
+    Repair and sequential may supply a private sticky _error_out flag; the
+    caller then owns the final RNG check. Keys does not support deferral.
     """
     n, n1 = _shape(n, n1)
     seed = _integer(seed, "seed", 0, 2**64 - 1)
     if sampler not in ("keys", "sequential", "repair"):
         raise ValueError("sampler must be keys, sequential, or repair")
+    if not isinstance(_empty_output, (bool, np.bool_)):
+        raise ValueError("_empty_output must be a boolean")
+    if _profile is not None and not callable(_profile):
+        raise TypeError("_profile must be callable or None")
     cp = _cupy()
     if _error_out is not None:
-        if sampler != "repair" or _error_out.shape != (1,) or _error_out.dtype != cp.uint32:
-            raise ValueError("deferred RNG errors require repair and a uint32[1] device flag")
+        if (sampler not in ("repair", "sequential") or not isinstance(_error_out, cp.ndarray)
+                or _error_out.shape != (1,) or _error_out.dtype != cp.uint32):
+            raise ValueError("deferred RNG errors require repair/sequential and a uint32[1] device flag")
     ids = _ids(candidate_ids, cp)
     count = int(ids.size)
-    w = cp.zeros((count, n), dtype=cp.uint8)
+    allocate = cp.empty if _empty_output and sampler != "keys" else cp.zeros
+    w = allocate((count, n), dtype=cp.uint8)
     if not count:
         return w
     scalar_args = (ids, np.uint64(seed), np.int32(n))
@@ -123,20 +173,108 @@ def generate_cuda(n, n1, candidate_ids, seed, sampler="keys", *, _error_out=None
         rows = cp.arange(count)[:, None]
         w[rows, order[:, :n1]] = 1
     elif sampler == "sequential":
-        error = cp.zeros(1, dtype=cp.uint32)
-        _kernel("generate_sequential")(((count + 127) // 128,), (128,),
-            scalar_args + (np.int32(n1), np.int32(count), w, error))
-        _check_rng(error)
-    else:
-        _launch_1d(_kernel("generate_fair_bits"), count * ((n + 31) // 32) * 32,
-                   scalar_args + (np.int32(count), w))
-        counts = w.sum(axis=1, dtype=cp.int64)
         error = cp.zeros(1, dtype=cp.uint32) if _error_out is None else _error_out
-        _kernel("repair_counts")(((count + 127) // 128,), (128,),
-            scalar_args + (np.int32(n1), np.int32(count), counts, w, error))
+        args = scalar_args + (np.int32(n1), np.int32(count), w, error)
+        if _profile is None:
+            _kernel("generate_sequential")(((count + 127) // 128,), (128,), args)
+        else:
+            _profile("sequential", lambda: _kernel("generate_sequential")(
+                ((count + 127) // 128,), (128,), args))
+        if _error_out is None:
+            _check_rng(error)
+    else:
+        bits_args = scalar_args + (np.int32(count), w)
+        bits_size = count * ((n + 31) // 32) * 32
+        if _profile is None:
+            _launch_1d(_kernel("generate_fair_bits"), bits_size, bits_args)
+            counts = w.sum(axis=1, dtype=cp.int64)
+        else:
+            _profile("fair_bits", lambda: _launch_1d(
+                _kernel("generate_fair_bits"), bits_size, bits_args))
+            counts = _profile("count", lambda: w.sum(axis=1, dtype=cp.int64))
+        error = cp.zeros(1, dtype=cp.uint32) if _error_out is None else _error_out
+        args = scalar_args + (np.int32(n1), np.int32(count), counts, w, error)
+        if _profile is None:
+            _kernel("repair_counts")(((count + 127) // 128,), (128,), args)
+        else:
+            _profile("repair", lambda: _kernel("repair_counts")(
+                ((count + 127) // 128,), (128,), args))
         if _error_out is None:
             _check_rng(error)
     return w
+
+
+def _workspace_buffer(value, shape, dtype, cp, name):
+    """Validate internal output storage without reading device values."""
+    if (not isinstance(value, cp.ndarray) or value.shape != shape
+            or value.dtype != dtype or not value.flags.c_contiguous
+            or value.device.id != cp.cuda.runtime.getDevice()):
+        raise ValueError(f"{name} must be a contiguous current-device {dtype} buffer of shape {shape}")
+    return value
+
+
+def _workspace_no_overlap(output, inputs):
+    """Reject writable aliasing using pointer metadata, never a device read."""
+    if not output.nbytes:
+        return
+    begin, end = output.data.ptr, output.data.ptr + output.nbytes
+    for value in inputs:
+        if value is not None and value.nbytes and (
+                begin < value.data.ptr + value.nbytes and value.data.ptr < end):
+            raise ValueError("workspace output must not overlap another input or scratch buffer")
+
+
+def generate_packed_repair_cuda(n, n1, candidate_ids, seed, *, _error_out=None,
+                                _profile=None, _out=None, _counts_out=None):
+    """Private PK1 repair sampler, with no dense assignment intermediate.
+
+    The byte layout, Philox addresses and serial flip order are identical to
+    packing generate_cuda(..., sampler='repair'). Every output byte, including
+    zero padding, is written before use. A supplied sticky error is never reset.
+    Private workspace callers may provide both output and count scratch. They
+    own their lifetime and must finish consuming a batch before reusing it.
+    """
+    n, n1 = _shape(n, n1)
+    seed = _integer(seed, "seed", 0, 2**64 - 1)
+    if _profile is not None and not callable(_profile):
+        raise TypeError("_profile must be callable or None")
+    cp = _cupy()
+    if _error_out is not None and (not isinstance(_error_out, cp.ndarray) or
+            _error_out.shape != (1,) or _error_out.dtype != cp.uint32):
+        raise ValueError("deferred RNG errors require a uint32[1] device flag")
+    ids = _ids(candidate_ids, cp)
+    count = int(ids.size)
+    if (_out is None) != (_counts_out is None):
+        raise ValueError("packed workspace requires both _out and _counts_out")
+    if _out is None:
+        packed = cp.empty((count, (n + 7) // 8), dtype=cp.uint8)
+        counts = None
+    else:
+        packed = _workspace_buffer(_out, (count, (n + 7) // 8), cp.uint8, cp, "_out")
+        counts = _workspace_buffer(_counts_out, (count,), cp.int64, cp, "_counts_out")
+        _workspace_no_overlap(packed, (counts, ids, _error_out))
+        _workspace_no_overlap(counts, (ids, _error_out))
+    if not count:
+        return packed
+    module = _packed_repair_module(cp.cuda.runtime.getDevice())
+    if counts is None:
+        counts = cp.empty(count, dtype=cp.int64)
+    error = cp.zeros(1, dtype=cp.uint32) if _error_out is None else _error_out
+    scalar = (ids, np.uint64(seed), np.int32(n))
+
+    def measured(name, call):
+        return call() if _profile is None else _profile(name, call)
+
+    measured("fair_bits", lambda: _launch_1d(
+        module.get_function("generate_packed_fair_bits"), count * ((n + 31) // 32),
+        scalar + (np.int32(count), packed)))
+    measured("count", lambda: _launch_1d(module.get_function("count_packed_rows"), count,
+        (packed, np.int32(n), np.int32(count), counts)))
+    measured("repair", lambda: _launch_1d(module.get_function("repair_packed_counts"), count,
+        scalar + (np.int32(n1), np.int32(count), counts, packed, error)))
+    if _error_out is None:
+        _check_rng(error)
+    return packed
 
 
 def _dense(w, cp):
@@ -243,14 +381,120 @@ def score_cuda(problem, w, n1, backend="reduce", representation="dense"):
     return output
 
 
-def fused_sequential_cuda(problem, n1, candidate_ids, seed):
+def score_fixed_w_cuda(problem, w, n1, *, representation="dense",
+                       candidate_tile=4, subject_tile=32, _out=None):
+    """Trusted FP64/pre fixed-W PK0 experiment, not a public scoring API.
+
+    The caller must validate binary entries, exact treatment counts, packed
+    tail bits, and input/output finiteness OUTSIDE the timed region. Only array
+    metadata is checked here; no device scalar is read and no error flag is
+    accumulated. Deferred E2E callers must own sticky RNG validation and the
+    full-pool finite-score check, as engine.sample_topk does.
+    Dense and packed variants use identical tiles and accumulation order.
+    _out is private search-owned storage; its metadata is checked, and the
+    caller must keep score regions disjoint across batches until selection.
+    """
+    candidate_tile = _integer(candidate_tile, "candidate_tile", 4, 8)
+    subject_tile = _integer(subject_tile, "subject_tile", 32, 64)
+    if candidate_tile not in (4, 8) or subject_tile not in (32, 64):
+        raise ValueError("PK0 tiles must use 4/8 candidates and 32/64 subjects")
+    if representation not in ("dense", "packed"):
+        raise ValueError("representation must be dense or packed")
+    if problem.precision != "fp64":
+        raise ValueError("PK0 fixed-W experiments require precision='fp64'")
+    cp = _cupy()
+    n, p, n1, dtype, z, correction = _problem(problem, n1, cp)
+    width = n if representation == "dense" else (n + 7) // 8
+    if (not isinstance(w, cp.ndarray) or w.ndim != 2 or w.dtype != cp.uint8
+            or w.shape[1] != width or w.shape[0] > 2**31 - 1
+            or not w.flags.c_contiguous):
+        raise ValueError("trusted W must be a C-contiguous CUDA uint8 array with the expected shape")
+    count = int(w.shape[0])
+    output = (cp.empty(count, dtype=dtype) if _out is None else
+              _workspace_buffer(_out, (count,), dtype, cp, "_out"))
+    if _out is not None:
+        _workspace_no_overlap(output, (w, z, correction))
+    if count:
+        packed = "true" if representation == "packed" else "false"
+        name = f"score_tiled_variant<double,{packed},{candidate_tile},{subject_tile}>"
+        kernel = _tiled_module(cp.cuda.runtime.getDevice()).get_function(name)
+        kernel(((count + candidate_tile - 1) // candidate_tile,),
+               (candidate_tile * 32,),
+               (w, z, correction, np.int32(n), np.int32(p), np.int32(n1),
+                np.int32(count), dtype.type(n / (n1 * (n - n1))), output))
+    return output
+
+
+def fused_repair_cuda(problem, n1, candidate_ids, seed, *, _error_out=None,
+                      _debug_packed_out=None, _test_limits=None):
+    """Experimental repair-first scoring with shared packed membership only.
+
+    Production stores no batch assignment matrix in global memory. An optional
+    private packed output supports exact full-pool candidate tests; test limits
+    compile a separate module to exercise finite RNG exhaustion and barriers.
+    A supplied error flag is sticky. Its caller must check both the flag and
+    ALL output scores before selection, as sample_topk's deferred path does.
+    """
+    if (problem.device != "cuda" or problem.criterion != "full" or
+            problem.precision != "fp64" or problem.whitening != "pre"):
+        raise ValueError("repair fused requires CUDA/full/FP64/pre")
+    if problem.n > 1024 or problem.p > 32:
+        raise ValueError("repair fused currently supports n <= 1024 and p <= 32")
+    seed = _integer(seed, "seed", 0, 2**64 - 1)
+    if _test_limits is not None:
+        if not isinstance(_test_limits, tuple) or len(_test_limits) != 3:
+            raise ValueError("_test_limits must be (attempt_max, trial_limit, force_reject)")
+        attempt = _integer(_test_limits[0], "attempt_max", 0, 2**24 - 1)
+        trial = _integer(_test_limits[1], "trial_limit", 0, 2**32)
+        if not isinstance(_test_limits[2], (bool, np.bool_)):
+            raise ValueError("force_reject must be boolean")
+        _test_limits = (attempt, trial, bool(_test_limits[2]))
+    cp = _cupy()
+    # A cross-device input must not be read through an invalid device pointer.
+    device_id = cp.cuda.runtime.getDevice()
+    for value in (problem.z, problem.correction, candidate_ids):
+        if isinstance(value, cp.ndarray) and value.device.id != device_id:
+            raise ValueError("repair fused inputs must belong to the current CUDA device")
+    if _error_out is not None:
+        _workspace_buffer(_error_out, (1,), cp.uint32, cp, "_error_out")
+    n, p, n1, dtype, z, correction = _problem(problem, n1, cp)
+    ids = _ids(candidate_ids, cp)
+    count = int(ids.size)
+    if _debug_packed_out is not None:
+        _workspace_buffer(_debug_packed_out, (count, (n + 7) // 8), cp.uint8,
+                          cp, "_debug_packed_out")
+        _workspace_no_overlap(_debug_packed_out, (z, correction, ids, _error_out))
+    if _error_out is not None:
+        _workspace_no_overlap(_error_out, (z, correction, ids, _debug_packed_out))
+    output = cp.empty(count, dtype=dtype)
+    error = cp.zeros(1, dtype=cp.uint32) if _error_out is None else _error_out
+    if count:
+        kernel = _repair_fused_module(device_id, _test_limits).get_function("score_fused_repair")
+        kernel(((count + 7) // 8,), (256,),
+               (ids, np.uint64(seed), z, correction, np.int32(n), np.int32(p),
+                np.int32(n1), np.int32(count), dtype.type(n / (n1 * (n - n1))),
+                output, error, np.uint64(0) if _debug_packed_out is None else _debug_packed_out))
+    if _error_out is None:
+        _check_rng(error)
+        if not bool(cp.all(cp.isfinite(output)).item()):
+            raise FloatingPointError("balance evaluation produced nonfinite scores")
+    return output
+
+
+def fused_sequential_cuda(problem, n1, candidate_ids, seed, *, _error_out=None):
     """Generate the sequential sampler's proposals and score without storing W.
 
     This initial fused kernel supports p <= 1024; it is an experimental path,
     not an automatically selected or performance-validated default.
+    A supplied private uint32[1] error flag is sticky and suppresses host RNG
+    and score-finiteness reads. Its engine caller must check the flag and ALL
+    candidate scores before selection/output. Ordinary calls keep both checks.
     """
     seed = _integer(seed, "seed", 0, 2**64 - 1)
     cp = _cupy()
+    if _error_out is not None and (not isinstance(_error_out, cp.ndarray)
+            or _error_out.shape != (1,) or _error_out.dtype != cp.uint32):
+        raise ValueError("deferred RNG errors require a uint32[1] device flag")
     n, p, n1, dtype, z, correction = _problem(problem, n1, cp)
     if p > 1024:
         raise ValueError("fused sequential scoring currently supports p <= 1024")
@@ -261,12 +505,13 @@ def fused_sequential_cuda(problem, n1, candidate_ids, seed):
         cpp = "float" if dtype == cp.dtype("float32") else "double"
         max_p = next(limit for limit in (32, 128, 512, 1024) if p <= limit)
         scale = dtype.type(n / (n1 * (n - n1)))
-        error = cp.zeros(1, dtype=cp.uint32)
+        error = cp.zeros(1, dtype=cp.uint32) if _error_out is None else _error_out
         _kernel(f"score_fused_sequential<{cpp},{max_p}>")(
             ((count + 3) // 4,), (128,),
             (ids, np.uint64(seed), z, correction, np.int32(n), np.int32(p),
              np.int32(n1), np.int32(count), scale, output, error))
-        _check_rng(error)
-        if not bool(cp.all(cp.isfinite(output)).item()):
-            raise FloatingPointError("balance evaluation produced nonfinite scores")
+        if _error_out is None:
+            _check_rng(error)
+            if not bool(cp.all(cp.isfinite(output)).item()):
+                raise FloatingPointError("balance evaluation produced nonfinite scores")
     return output
