@@ -8,6 +8,11 @@ Mahalanobis balance: $M=\frac{n_1(n-n_1)}{n}\Delta^\top S^{-1}\Delta$ in FP64,
 where $\Delta=\bar X_T-\bar X_C$ and $S$ is the sample covariance (`ddof=1`).
 Lower is better; exact ties use candidate IDs. Set `k=1` for best-choice fixed-budget search.
 
+FlashRerand provides three GPU execution paths: GEMM, Packed, and Fused. Its "Flash"
+design emphasizes compact assignment storage, covariate-tile reuse, and fused
+sampling and scoring. The Fused path avoids writing candidate assignment batches
+to global memory and reconstructs only the selected results.
+
 ## Install
 
 Python 3.10+. Install from this checkout; CUDA requires an NVIDIA GPU and CUDA 12.x.
@@ -51,25 +56,30 @@ repair-fused. Unsupported combinations and unavailable CUDA raise errors.
 ```mermaid
 flowchart TD
     X["Input X and design parameters"] --> P["Validate and preprocess<br/>Full covariance · FP64 whitening"]
-    P --> D{"Device"}
+    P --> ROUTES
 
-    D -->|CPU| C["Sampler: keys<br/>auto default"]
-    D -->|CUDA| G{"Resolve sampler"}
-    G -->|auto / repair| R["repair"]
-    G -->|sequential| S["sequential"]
+    subgraph ROUTES["Sampler and backend"]
+        direction TB
+        D{"Device"}
+        D -->|CPU| C["Sampler: keys<br/>auto default"]
+        D -->|CUDA| G{"Resolve sampler"}
+        G -->|auto / repair| R["repair"]
+        G -->|sequential| S["sequential"]
 
-    C --> CG["CPU GEMM"]
-    R --> GM["GPU GEMM<br/>Dense assignments"]
-    R --> PK["Packed<br/>Direct packed assignments + tiled scoring"]
-    R --> F["Fused · experimental<br/>Sampling + scoring<br/>No global assignment batch"]
-    S --> GM
-    S --> F
+        C --> CG["CPU GEMM"]
+        R --> GM["GPU GEMM<br/>Dense assignments"]
+        R --> PK["Packed<br/>Direct packed assignments + tiled scoring"]
+        R --> F["Fused · experimental<br/>Sampling + scoring<br/>No global assignment batch"]
+        S --> GM
+        S --> F
 
-    CG --> K["Global Top-K"]
-    GM --> K
-    PK --> K
-    F --> K
+        CG --> SCORES["Candidate scores"]
+        GM --> SCORES
+        PK --> SCORES
+        F --> SCORES
+    end
 
+    ROUTES --> K["Global Top-K"]
     K --> O["Gather or replay selected assignments"]
     O --> H["Return host arrays<br/>scores · candidate IDs · metadata · timings"]
 ```
